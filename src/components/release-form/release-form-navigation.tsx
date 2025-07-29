@@ -1,11 +1,5 @@
 import { Info, Music, Settings, Menu, AlertCircle, CheckCircle2 } from 'lucide-react'
 import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from '@/components/ui/navigation-menu'
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -82,54 +76,46 @@ export function ReleaseFormNavigation({
 
           {/* Десктопная навигация */}
           <div className="hidden md:block">
-            <NavigationMenu>
-              <NavigationMenuList className="gap-1">
-                <NavigationMenuItem>
-                  <NavigationMenuLink
-                    onClick={() => setActiveTab('basic')}
-                    active={activeTab === 'basic'}
-                    className={`text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-2 px-4 font-medium hover:bg-transparent data-[active]:bg-transparent transition-all cursor-pointer ${
-                      activeTab === 'basic' ? 'text-primary border-b-primary' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Info className="w-4 h-4" />
-                      Основная информация
-                    </div>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <NavigationMenuLink
-                    onClick={() => setActiveTab('tracks')}
-                    active={activeTab === 'tracks'}
-                    className={`text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-2 px-4 font-medium hover:bg-transparent data-[active]:bg-transparent transition-all cursor-pointer ${
-                      activeTab === 'tracks' ? 'text-primary border-b-primary' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Music className="w-4 h-4" />
-                      Треки
-                    </div>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <NavigationMenuLink
-                    onClick={() => setActiveTab('settings')}
-                    active={activeTab === 'settings'}
-                    className={`text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-2 px-4 font-medium hover:bg-transparent data-[active]:bg-transparent transition-all cursor-pointer ${
-                      activeTab === 'settings' ? 'text-primary border-b-primary' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Settings className="w-4 h-4" />
-                      Настройки релиза
-                    </div>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
+            <nav aria-label="Main" className="flex items-center gap-1">
+              <button
+                onClick={() => setActiveTab('basic')}
+                data-active={activeTab === 'basic'}
+                className={`text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-2 px-4 font-medium hover:bg-transparent data-[active]:bg-transparent transition-all cursor-pointer ${
+                  activeTab === 'basic' ? 'text-primary border-b-primary' : ''
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4" />
+                  Основная информация
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('tracks')}
+                data-active={activeTab === 'tracks'}
+                className={`text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-2 px-4 font-medium hover:bg-transparent data-[active]:bg-transparent transition-all cursor-pointer ${
+                  activeTab === 'tracks' ? 'text-primary border-b-primary' : ''
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Music className="w-4 h-4" />
+                  Треки
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('settings')}
+                data-active={activeTab === 'settings'}
+                className={`text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-2 px-4 font-medium hover:bg-transparent data-[active]:bg-transparent transition-all cursor-pointer ${
+                  activeTab === 'settings' ? 'text-primary border-b-primary' : ''
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  Настройки релиза
+                </div>
+              </button>
+            </nav>
           </div>
         </div>
 
