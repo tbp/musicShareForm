@@ -343,7 +343,7 @@ function EnhancedUPCInput({
           label=""
           value={value}
           onChange={onChange}
-          placeholder="Оставьте поле пустым. Мы автоматически сгенерируем уникальный код"
+          placeholder="Укажите UPC код, если есть — иначе мы сгенерируем автоматически"
           error={hasValidationError ? "Неверный формат UPC кода" : undefined}
           showHelpButton={true}
           onHelpClick={togglePopover}
@@ -429,7 +429,7 @@ function EnhancedUPCInput({
                       <div className="text-xs">
                         <p className="text-foreground font-medium mb-1">Нет UPC кода?</p>
                         <p className="text-muted-foreground">
-                          Оставьте поле пустым. Мы автоматически сгенерируем уникальный код при распространении релиза.
+                          Не волнуйтесь! Если у вас нет собственного UPC кода, мы автоматически сгенерируем уникальный идентификатор при распространении релиза.
                         </p>
                       </div>
                     </div>
