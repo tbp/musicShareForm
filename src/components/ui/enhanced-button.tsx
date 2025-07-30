@@ -1,7 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { Slot } from '@radix-ui/react-slot'
+// Простая замена Slot для asChild паттерна
+const Slot = ({ children, ...props }: any) => {
+  if (React.isValidElement(children)) {
+    return React.cloneElement(children, props)
+  }
+  return <span {...props}>{children}</span>
+}
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 

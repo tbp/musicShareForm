@@ -1,27 +1,25 @@
 'use client'
 
-import { Save, Play, Disc, Library, FolderOpen, User, Settings, AlertCircle } from 'lucide-react'
+import { Play, Disc, Library, FolderOpen, User, Settings, AlertCircle } from 'lucide-react'
 import { ValidationModal } from '@/components/features/validation-modal'
 import { AnimatedInput } from '@/components/ui/animated-input'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { EnhancedFileUpload } from '@/components/ui/enhanced-file-upload'
 import { DraggableArtistItem } from '@/components/ui/draggable-artist-item'
 import { RadioCard, RadioCardGroup } from '@/components/ui/radio-card'
-import { UPCInput } from '@/components/ui/upc-input'
 
-import { useReleaseForm } from '@/hooks/use-release-form'
-import { ReleaseFormHeader } from '@/components/release-form/release-form-header'
-import { ReleaseFormNavigation } from '@/components/release-form/release-form-navigation'
+import { ReleaseFormProvider, useReleaseFormContext } from '@/contexts/release-form-context'
+import EnhancedReleaseFormNavigation from '@/components/release-form/enhanced-release-form-navigation'
 import { BasicInfoSection } from '@/components/release-form/sections/basic-info-section'
+import { DatesIdentificationSection } from '@/components/release-form/sections/dates-identification-section'
+import { Footer } from '@/components/ui/footer'
 
-export function ReleaseFormScreen() {
+function ReleaseFormContent() {
   const {
     // Состояние
     activeTab,
-    setActiveTab,
     validationOpen,
     setValidationOpen,
-    isSubmitting,
     draggedIndex,
     formData,
     coverArt,
@@ -39,22 +37,16 @@ export function ReleaseFormScreen() {
     moveArtist,
     handleDragStart,
     handleDragOver,
-    handleDrop,
-    handleSubmit
-  } = useReleaseForm()
+    handleDrop
+  } = useReleaseFormContext()
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-6xl mx-auto">
-          <ReleaseFormHeader />
-          
-          <ReleaseFormNavigation 
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            validationProgress={validationProgress}
-            onValidationClick={() => setValidationOpen(true)}
-          />
+    <div className="min-h-screen bg-background flex flex-col">
+      <EnhancedReleaseFormNavigation />
+      
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-6">
+          <div className="max-w-6xl mx-auto">
 
           {/* Контент вкладок */}
           {activeTab === 'basic' && (
@@ -106,78 +98,12 @@ export function ReleaseFormScreen() {
                 </RadioCardGroup>
               </div>
 
-              {/* Секция 3: Управление датами и идентификацией */}
-              <div className="professional-card p-10">
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-foreground">
-                    Управление датами и идентификацией
-                  </h2>
-                </div>
-
-                <div className="space-y-8">
-                  {/* Строка с датами */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Левая часть - Дата цифрового релиза */}
-                  <AnimatedInput
-                      label="Дата цифрового релиза"
-                      type="date"
-                      value={formData.releaseDate}
-                      onChange={(e) => {
-                        handleInputChange('releaseDate', e.target.value)
-                        // Синхронизируем с оригинальной датой если она не отличается
-                        if (!formData.originalReleaseDate || formData.originalReleaseDate === formData.releaseDate) {
-                          handleInputChange('originalReleaseDate', e.target.value)
-                        }
-                      }}
-                      required
-                    />
-                    
-                    {/* Правая часть - Опция оригинальной даты или кнопка */}
-                    {formData.originalReleaseDate && formData.originalReleaseDate !== formData.releaseDate ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Отдельная дата оригинального релиза</span>
-                          <button
-                            type="button"
-                            onClick={() => handleInputChange('originalReleaseDate', formData.releaseDate || '')}
-                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            Убрать
-                          </button>
-                        </div>
-                  <AnimatedInput
-                          label="Дата оригинального релиза"
-                    type="date"
-                    value={formData.originalReleaseDate}
-                    onChange={(e) => handleInputChange('originalReleaseDate', e.target.value)}
-                  />
-                </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <button
-                          type="button"
-                          onClick={() => handleInputChange('originalReleaseDate', formData.releaseDate || '')}
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-dashed border-border rounded-lg hover:border-primary/50 transition-all duration-200 hover:bg-accent/30 h-fit"
-                        >
-                          <span>+</span>
-                          <span>Отдельная дата оригинального релиза</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Третья строка: UPC код */}
-                  <div className="w-full">
-                    <UPCInput
-                      label="UPC / ICPN / EAN код"
-                      value={formData.upc}
-                      onChange={(value) => handleInputChange('upc', value)}
-                      hint="Будет присвоен автоматически, если не указать"
-                      placeholder="Оставьте пустым для автоматического присвоения"
-                    />
-                  </div>
-                </div>
-              </div>
+              {/* Секция 3: Даты и идентификация */}
+              <DatesIdentificationSection
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+              />
 
               {/* Секция 4: Участники */}
               <div className="professional-card p-10">
@@ -291,19 +217,7 @@ export function ReleaseFormScreen() {
             </div>
           )}
 
-          {/* Кнопка сохранения */}
-          <div className="flex justify-center mt-8">
-            <EnhancedButton
-              onClick={handleSubmit}
-              loading={isSubmitting}
-              size="lg"
-              variant="gradient"
-              leftIcon={<Save className="w-5 h-5" />}
-              animation="glow"
-            >
-              {isSubmitting ? 'Создание релиза...' : 'Создать релиз'}
-            </EnhancedButton>
-          </div>
+
 
           {/* Модал валидации */}
           <ValidationModal
@@ -314,8 +228,19 @@ export function ReleaseFormScreen() {
             completedItems={0}
             totalItems={0}
           />
+          </div>
         </div>
-      </div>
+      </main>
+      
+      <Footer />
     </div>
+  )
+}
+
+export function ReleaseFormScreen() {
+  return (
+    <ReleaseFormProvider>
+      <ReleaseFormContent />
+    </ReleaseFormProvider>
   )
 } 

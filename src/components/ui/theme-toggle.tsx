@@ -7,10 +7,19 @@ export function ThemeToggle() {
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
-    // Проверяем сохраненную тему или системные настройки
+    // Проверяем сохраненную тему или используем системные настройки по умолчанию
     const saved = localStorage.getItem('theme')
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const shouldBeDark = saved === 'dark' || (!saved && systemDark)
+    
+    let shouldBeDark: boolean
+    if (saved === 'dark') {
+      shouldBeDark = true
+    } else if (saved === 'light') {
+      shouldBeDark = false
+    } else {
+      // Если тема не сохранена, используем системную
+      shouldBeDark = systemDark
+    }
     
     setIsDark(shouldBeDark)
     if (shouldBeDark) {
@@ -18,6 +27,23 @@ export function ThemeToggle() {
     } else {
       document.documentElement.classList.remove('dark')
     }
+
+    // Отслеживаем изменения системной темы
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('theme')) {
+        // Если пользователь не выбрал тему вручную, следуем системной
+        setIsDark(e.matches)
+        if (e.matches) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+      }
+    }
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange)
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange)
   }, [])
 
   const toggleTheme = () => {

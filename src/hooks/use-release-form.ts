@@ -143,6 +143,26 @@ export function useReleaseForm() {
     return Math.round((filledFields / requiredFields.length) * 100)
   }, [formData, coverArt])
 
+  // Проверяем, есть ли изменения в форме
+  const hasFormChanges = useCallback(() => {
+    return (
+      formData.title.trim() !== '' ||
+      (formData.subtitle && formData.subtitle.trim() !== '') ||
+      formData.releaseType !== '' ||
+      formData.releaseDate !== '' ||
+      (formData.recordingYear && formData.recordingYear.trim() !== '') ||
+      (formData.originalReleaseDate && formData.originalReleaseDate.trim() !== '') ||
+      formData.genre !== '' ||
+      (formData.subGenre && formData.subGenre !== '') ||
+      formData.label.trim() !== '' ||
+      (formData.upc && formData.upc.trim() !== '') ||
+      (formData.notes && formData.notes.trim() !== '') ||
+      formData.artists.length > 0 ||
+      coverArt.length > 0 ||
+      audioFiles.length > 0
+    )
+  }, [formData, coverArt, audioFiles])
+
   const handleSubmit = async () => {
     if (!validateForm()) return
 
@@ -183,6 +203,7 @@ export function useReleaseForm() {
   }
 
   const validationProgress = getValidationProgress()
+  const formHasChanges = hasFormChanges()
 
   return {
     // Состояние
@@ -199,6 +220,7 @@ export function useReleaseForm() {
     setAudioFiles,
     errors,
     validationProgress,
+    hasFormChanges: formHasChanges,
 
     // Обработчики
     handleInputChange,

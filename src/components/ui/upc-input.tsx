@@ -1,8 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import * as PopoverPrimitive from '@radix-ui/react-popover'
-import { Check, Hash, HelpCircle } from 'lucide-react'
+import { Check, Hash, CircleQuestionMark, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface UPCInputProps {
@@ -15,6 +14,10 @@ interface UPCInputProps {
   disabled?: boolean
   required?: boolean
   className?: string
+  onFocus?: () => void
+  onBlur?: () => void
+  showHelpButton?: boolean
+  onHelpClick?: () => void
 }
 
 // Форматы UPC/EAN
@@ -34,6 +37,10 @@ export function UPCInput({
   disabled = false,
   required = false,
   className,
+  onFocus,
+  onBlur,
+  showHelpButton = true,
+  onHelpClick,
   ...props
 }: UPCInputProps) {
   const [isFocused, setIsFocused] = React.useState(false)
@@ -131,7 +138,7 @@ export function UPCInput({
   return (
     <div className={cn('relative', className)}>
       {/* Floating Label */}
-      {label && (
+      {label && label.trim() && (
         <label
           htmlFor={inputId}
           className={cn(
@@ -168,19 +175,28 @@ export function UPCInput({
           type="text"
           value={displayValue}
           onChange={handleInputChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={() => {
+            setIsFocused(true)
+            onFocus?.()
+          }}
+          onBlur={() => {
+            setIsFocused(false)
+            onBlur?.()
+          }}
           disabled={disabled}
-          placeholder={label ? ' ' : placeholder}
+          placeholder={label && label.trim() ? ' ' : placeholder}
           className={cn(
             // Base styles
             'peer w-full bg-background border border-input rounded-lg px-3 text-foreground font-mono',
-            'placeholder:text-transparent placeholder-shown:border-input',
+            // Placeholder visibility based on label presence
+            label && label.trim() 
+              ? 'placeholder:text-transparent placeholder-shown:border-input'
+              : 'placeholder:text-muted-foreground/70 placeholder:text-sm placeholder:font-normal',
             'transition-all duration-200 ease-out',
             'focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary',
             
             // Padding based on label presence
-            label ? 'pt-6 pb-2' : 'py-3',
+            label && label.trim() ? 'pt-6 pb-2' : 'py-3',
             
             // Icon padding (для статуса + справки)
             'pr-12',
@@ -201,91 +217,60 @@ export function UPCInput({
           {isComplete && isValid && (
             <Check className="h-4 w-4 text-success" />
           )}
+          {isComplete && !isValid && (
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
+          )}
           {!isComplete && numbers.length > 0 && (
             <Hash className="h-4 w-4 text-muted-foreground" />
           )}
           
-          {/* Help tooltip */}
-          <PopoverPrimitive.Root>
-            <PopoverPrimitive.Trigger asChild>
-              <button
-                type="button"
-                className="ml-1 p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Справка по форматам UPC"
-              >
-                <HelpCircle className="h-3 w-3" />
-              </button>
-            </PopoverPrimitive.Trigger>
-            <PopoverPrimitive.Portal>
-              <PopoverPrimitive.Content
-                className={cn(
-                  'z-50 w-80 rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg',
-                  'data-[state=open]:animate-in data-[state=closed]:animate-out',
-                  'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-                  'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-                  'data-[side=bottom]:slide-in-from-top-2'
-                )}
-                sideOffset={4}
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Поддерживаемые форматы:</span>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono">123456789012</span>
-                      <span className="text-muted-foreground">UPC-A (12 цифр)</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono">1234567890123</span>
-                      <span className="text-muted-foreground">EAN-13 (13 цифр)</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono">12345670</span>
-                      <span className="text-muted-foreground">UPC-E (8 цифр)</span>
-                    </div>
-                  </div>
-                  <div className="pt-2 border-t border-border text-xs text-muted-foreground">
-                    Коды автоматически валидируются и форматируются
-                  </div>
-                </div>
-                <PopoverPrimitive.Arrow className="fill-popover" />
-              </PopoverPrimitive.Content>
-            </PopoverPrimitive.Portal>
-          </PopoverPrimitive.Root>
+          {/* Help button */}
+          {showHelpButton && onHelpClick && (
+            <button
+              type="button"
+              className="ml-1 p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Справка по форматам UPC"
+              onClick={onHelpClick}
+            >
+              <CircleQuestionMark className="h-3 w-3" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Format Detection Info */}
-      {detectedFormat && (
-                 <div className="mt-1.5 flex items-center gap-2 text-xs">
-           <div className={cn(
-             'px-2 py-1 rounded text-xs font-medium upc-format-badge',
-             isValid 
-               ? 'bg-success/10 text-success border border-success/20'
-               : 'bg-info/10 text-info border border-info/20'
-           )}>
-             {detectedFormat}
-           </div>
-          <span className="text-muted-foreground">
-            {UPC_FORMATS[detectedFormat as keyof typeof UPC_FORMATS].description}
-          </span>
-          {isComplete && !isValid && (
-            <span className="text-destructive">Неверная контрольная сумма</span>
-          )}
+      {/* Format Detection Info - показываем только при фокусе и без ошибок */}
+      {detectedFormat && isFocused && !error && !hint && (
+        <div className="absolute left-0 top-full mt-3 z-[15] text-xs animate-fade-in">
+          <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2.5 shadow-lg hover:shadow-xl transition-all duration-200">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                'px-2.5 py-1 rounded-md text-xs font-semibold border transition-all duration-200',
+                isValid 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800'
+                  : 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-800'
+              )}>
+                {detectedFormat}
+              </div>
+              <span className="text-muted-foreground font-medium">
+                {UPC_FORMATS[detectedFormat as keyof typeof UPC_FORMATS].description}
+              </span>
+              {isComplete && !isValid && (
+                <span className="text-destructive font-semibold animate-pulse">Неверная контрольная сумма</span>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Helper Text / Error Message */}
+      {/* Helper Text / Error Message - приоритет над format info */}
       {(hint || error) && (
-        <div className="mt-1.5 text-xs">
+        <div className="absolute left-0 top-full mt-2 z-20 text-xs animate-fade-in">
           {error ? (
-            <span className="text-destructive animate-fade-in">
+            <span className="text-destructive bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-destructive/20 shadow-lg font-medium">
               {error}
             </span>
           ) : hint ? (
-            <span className="text-muted-foreground">
+            <span className="text-muted-foreground bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border shadow-lg">
               {hint}
             </span>
           ) : null}

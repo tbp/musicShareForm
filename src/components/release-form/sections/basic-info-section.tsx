@@ -88,7 +88,7 @@ export function BasicInfoSection({
         </div>
 
         <RadioGroupWithHints
-          label="Возрастные ограничения"
+          label="Ненормативная лексика"
           options={PARENTAL_ADVISORY_OPTIONS}
           value={formData.parentalAdvisory}
           onValueChange={(value) => onInputChange('parentalAdvisory', value)}
