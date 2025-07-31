@@ -4,10 +4,13 @@ type ISO8601 = `${string}-${string}-${string}`          // e.g. 2025-03-06
 type URI = `https://${string}`
 
 export interface ArtistCredit {
+  id?: string // Уникальный ID для UI (опциональный для обратной совместимости)
   displayName: string
-  role: 'MainArtist' | 'FeaturedArtist' | 'Remixer' | 'Producer'
+  role: 'MainArtist' | 'FeaturedArtist' | 'Remixer' | 'Producer' | 'Vocalist' | 'Songwriter' | 'Composer' | 'Arranger' | 'MixEngineer' | 'MasteringEngineer'
   share: number // Доля в процентах
   sequence?: number
+  copyrightShare?: number // Доля в авторских правах (до 100%)
+  relatedRightsShare?: number // Доля в смежных правах (до 100%)
 }
 
 export interface Contributor {
@@ -91,6 +94,7 @@ export interface ReleaseFormData {
   title: string
   subtitle?: string
   releaseType: 'Single' | 'EP' | 'Album' | 'Compilation' | ''
+  variousArtists: boolean
   releaseDate: string
   recordingYear?: string
   originalReleaseDate?: string

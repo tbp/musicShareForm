@@ -337,3 +337,51 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Исправление цвета логотипа zvook для темной темы */
+.dark img[src="/zvook.svg"] {
+  filter: invert(1) brightness(0) saturate(100%) contrast(100%);
+}
+
+/* Альтернативный вариант - использовать более специфичный селектор */
+.dark img[alt="Звук"] {
+  filter: invert(1) brightness(0) saturate(100%) contrast(100%);
+}
+
+/* Кастомная стилизация скролла для диалогов и других элементов */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-track-transparent {
+    scrollbar-color: transparent transparent;
+  }
+  
+  .scrollbar-thumb-border {
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  
+  .hover\:scrollbar-thumb-border\/80:hover {
+    scrollbar-color: hsl(var(--border) / 0.8) transparent;
+  }
+  
+  /* Webkit скроллбар для браузеров на webkit */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thumb-border::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+  
+  .hover\:scrollbar-thumb-border\/80:hover::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border) / 0.8);
+  }
+}

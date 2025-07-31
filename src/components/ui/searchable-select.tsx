@@ -99,7 +99,7 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
           <div
             onClick={() => !disabled && setIsOpen(!isOpen)}
             className={cn(
-              'relative w-full cursor-pointer rounded-lg border border-input bg-background px-3 py-3 text-left shadow-sm transition-all',
+              'relative w-full h-10 cursor-pointer rounded-lg border border-input bg-background px-3 py-2 text-left shadow-sm transition-all flex items-center',
               'focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary',
               'hover:border-primary/50',
               'disabled:cursor-not-allowed disabled:opacity-50',
@@ -146,7 +146,7 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
 
           {/* Dropdown */}
           {isOpen && (
-            <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg">
+            <div className="absolute z-[9999] mt-1 w-full rounded-lg border border-border bg-popover shadow-lg">
               {/* Поиск */}
               <div className="relative p-3 border-b border-border">
                 <Search className="absolute left-6 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

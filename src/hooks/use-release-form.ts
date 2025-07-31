@@ -6,7 +6,7 @@ export function useReleaseForm() {
   const [activeTab, setActiveTab] = useState('basic')
   const [validationOpen, setValidationOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+
 
   // Состояние формы
   const [formData, setFormData] = useState<ReleaseFormData>({
@@ -14,6 +14,7 @@ export function useReleaseForm() {
     title: '',
     subtitle: '',
     releaseType: '',
+    variousArtists: false,
     releaseDate: '',
     recordingYear: '',
     originalReleaseDate: '',
@@ -22,7 +23,15 @@ export function useReleaseForm() {
     parentalAdvisory: '',
     label: '',
     upc: '',
-    artists: [],
+    artists: [{
+      id: crypto.randomUUID(),
+      displayName: '',
+      role: 'MainArtist',
+      share: 0,
+      sequence: 1,
+      copyrightShare: 100,
+      relatedRightsShare: 100
+    }],
     copyright: [],
     notes: ''
   })
@@ -34,7 +43,7 @@ export function useReleaseForm() {
   // Ошибки валидации
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const handleInputChange = useCallback((field: keyof ReleaseFormData, value: string | number | boolean) => {
+  const handleInputChange = useCallback((field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -46,71 +55,52 @@ export function useReleaseForm() {
     }
   }, [errors])
 
-  const updateArtist = (index: number, field: keyof ArtistCredit, value: string | number) => {
+  const updateArtist = useCallback((index: number, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       artists: prev.artists.map((artist, i) =>
         i === index ? { ...artist, [field]: value } : artist
       )
     }))
-  }
+  }, [])
 
-  const addArtist = () => {
+  const addArtist = useCallback(() => {
     setFormData(prev => ({
       ...prev,
       artists: [...prev.artists, {
+        id: crypto.randomUUID(),
         displayName: '',
         role: 'MainArtist',
         share: 0,
-        sequence: prev.artists.length + 1
+        sequence: prev.artists.length + 1,
+        copyrightShare: 0,
+        relatedRightsShare: 0
       }]
     }))
-  }
+  }, [])
 
-  const removeArtist = (index: number) => {
+  const removeArtist = useCallback((index: number) => {
     setFormData(prev => ({
       ...prev,
       artists: prev.artists.filter((_, i) => i !== index)
     }))
-  }
+  }, [])
 
-  const moveArtist = (index: number, direction: 'up' | 'down') => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1
-    if (newIndex < 0 || newIndex >= formData.artists.length) return
-
+  const moveArtist = useCallback((fromIndex: number, toIndex: number) => {
     setFormData(prev => {
+      if (fromIndex < 0 || fromIndex >= prev.artists.length) return prev
+      if (toIndex < 0 || toIndex >= prev.artists.length) return prev
+      if (fromIndex === toIndex) return prev
+
       const newArtists = [...prev.artists]
-      const temp = newArtists[index]
-      newArtists[index] = newArtists[newIndex]
-      newArtists[newIndex] = temp
+      const draggedArtist = newArtists[fromIndex]
+      newArtists.splice(fromIndex, 1)
+      newArtists.splice(toIndex, 0, draggedArtist)
       return { ...prev, artists: newArtists }
     })
-  }
+  }, [])
 
-  // Drag & Drop для артистов
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index)
-    e.dataTransfer.effectAllowed = 'move'
-  }
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault()
-    if (draggedIndex === null || draggedIndex === dropIndex) return
-
-    setFormData(prev => {
-      const newArtists = [...prev.artists]
-      const draggedArtist = newArtists[draggedIndex]
-      newArtists.splice(draggedIndex, 1)
-      newArtists.splice(dropIndex, 0, draggedArtist)
-      return { ...prev, artists: newArtists }
-    })
-    setDraggedIndex(null)
-  }
 
   // Валидация
   const validateForm = useCallback(() => {
@@ -149,6 +139,7 @@ export function useReleaseForm() {
       formData.title.trim() !== '' ||
       (formData.subtitle && formData.subtitle.trim() !== '') ||
       formData.releaseType !== '' ||
+      formData.variousArtists !== false ||
       formData.releaseDate !== '' ||
       (formData.recordingYear && formData.recordingYear.trim() !== '') ||
       (formData.originalReleaseDate && formData.originalReleaseDate.trim() !== '') ||
@@ -212,7 +203,6 @@ export function useReleaseForm() {
     validationOpen,
     setValidationOpen,
     isSubmitting,
-    draggedIndex,
     formData,
     coverArt,
     setCoverArt,
@@ -228,9 +218,6 @@ export function useReleaseForm() {
     addArtist,
     removeArtist,
     moveArtist,
-    handleDragStart,
-    handleDragOver,
-    handleDrop,
     validateForm,
     handleSubmit
   }

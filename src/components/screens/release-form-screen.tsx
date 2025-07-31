@@ -1,17 +1,18 @@
 'use client'
 
-import { Play, Disc, Library, FolderOpen, User, Settings, AlertCircle } from 'lucide-react'
+import { User, Settings, AlertCircle } from 'lucide-react'
 import { ValidationModal } from '@/components/features/validation-modal'
 import { AnimatedInput } from '@/components/ui/animated-input'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { EnhancedFileUpload } from '@/components/ui/enhanced-file-upload'
 import { DraggableArtistItem } from '@/components/ui/draggable-artist-item'
-import { RadioCard, RadioCardGroup } from '@/components/ui/radio-card'
 
 import { ReleaseFormProvider, useReleaseFormContext } from '@/contexts/release-form-context'
 import EnhancedReleaseFormNavigation from '@/components/release-form/enhanced-release-form-navigation'
 import { BasicInfoSection } from '@/components/release-form/sections/basic-info-section'
+import { ReleaseTypeSection } from '@/components/release-form/sections/release-type-section'
 import { DatesIdentificationSection } from '@/components/release-form/sections/dates-identification-section'
+import { ParticipantsSection } from '@/components/release-form/sections/participants-section'
 import { Footer } from '@/components/ui/footer'
 
 function ReleaseFormContent() {
@@ -20,7 +21,6 @@ function ReleaseFormContent() {
     activeTab,
     validationOpen,
     setValidationOpen,
-    draggedIndex,
     formData,
     coverArt,
     setCoverArt,
@@ -34,11 +34,10 @@ function ReleaseFormContent() {
     updateArtist,
     addArtist,
     removeArtist,
-    moveArtist,
-    handleDragStart,
-    handleDragOver,
-    handleDrop
+    moveArtist
   } = useReleaseFormContext()
+
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -59,97 +58,31 @@ function ReleaseFormContent() {
                 onCoverArtChange={setCoverArt}
               />
 
-              {/* Секция: Тип релиза */}
-              <div className="professional-card p-10">
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-foreground">
-                    Тип релиза
-                  </h2>
-                </div>
-                
-                <RadioCardGroup
-                  value={formData.releaseType}
-                  onValueChange={(value) => handleInputChange('releaseType', value)}
-                >
-                  <RadioCard
-                    value="Single"
-                    title="Сингл"
-                    description="1-3 трека"
-                    icon={<Play className="w-4 h-4" />}
-                  />
-                  <RadioCard
-                    value="EP"
-                    title="EP"
-                    description="4-7 треков"
-                    icon={<Library className="w-4 h-4" />}
-                  />
-                  <RadioCard
-                    value="Album"
-                    title="Альбом"
-                    description="8+ треков"
-                    icon={<Disc className="w-4 h-4" />}
-                  />
-                  <RadioCard
-                    value="Compilation"
-                    title="Сборник"
-                    description="Готовые треки"
-                    icon={<FolderOpen className="w-4 h-4" />}
-                  />
-                </RadioCardGroup>
-              </div>
+              <ReleaseTypeSection
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+              />
 
-              {/* Секция 3: Даты и идентификация */}
+              {/* Секция: Даты и идентификация */}
               <DatesIdentificationSection
                 formData={formData}
                 errors={errors}
                 onInputChange={handleInputChange}
               />
 
-              {/* Секция 4: Участники */}
-              <div className="professional-card p-10">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-foreground">
-                    Участники произведения
-                  </h2>
-                  <EnhancedButton
-                    onClick={addArtist}
-                    variant="outline"
-                    size="sm"
-                    leftIcon={<User className="w-4 h-4" />}
-                  >
-                    Добавить исполнителя
-                  </EnhancedButton>
-                </div>
+              {/* Секция: Участники */}
+              <ParticipantsSection 
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+                onAddArtist={addArtist}
+                onUpdateArtist={updateArtist}
+                onRemoveArtist={removeArtist}
+                onMoveArtist={moveArtist}
+              />
 
-                <div className="space-y-4">
-                  {formData.artists.map((artist, index) => (
-                    <DraggableArtistItem
-                      key={index}
-                      artist={artist}
-                      index={index}
-                      isFirst={index === 0}
-                      isLast={index === formData.artists.length - 1}
-                      onUpdate={updateArtist}
-                      onRemove={removeArtist}
-                      onMove={moveArtist}
-                      onDragStart={handleDragStart}
-                      onDragOver={handleDragOver}
-                      onDrop={handleDrop}
-                      isDragging={draggedIndex === index}
-                      draggedIndex={draggedIndex}
-                    />
-                  ))}
-                </div>
-
-                {errors.artists && (
-                  <div className="validation-hint mt-4">
-                    <AlertCircle className="w-4 h-4 inline mr-2" />
-                    {errors.artists}
-                  </div>
-                )}
-              </div>
-
-              {/* Секция 5: Дополнительная информация */}
+              {/* Секция: Дополнительная информация */}
               <div className="professional-card p-10">
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-foreground">
