@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { Plus, Trash2, User, Hash, ExternalLink, Check, ChevronsUpDown } from 'lucide-react'
-import { ParticipantSuggestion, PlatformLink, PlatformType } from '@/data/participants'
+import { ParticipantSuggestion, PlatformLink, PlatformType } from '@/widgets/participant-manager'
 import { getPlatformInfo, PLATFORMS } from '@/lib/platforms'
 import { 
   Dialog,

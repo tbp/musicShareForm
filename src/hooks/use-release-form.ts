@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { ReleaseFormData, ArtistCredit, Release } from '@/types/ddex-release'
-import { FileItem } from '@/components/ui/enhanced-file-upload'
+import type { TrackFileItem } from '@/widgets/track-collection-manager'
+import type { FileItem } from '@/widgets/artwork-manager'
 
 export function useReleaseForm() {
   const [activeTab, setActiveTab] = useState('basic')
@@ -38,7 +39,7 @@ export function useReleaseForm() {
 
   // Файлы
   const [coverArt, setCoverArt] = useState<FileItem[]>([])
-  const [audioFiles, setAudioFiles] = useState<FileItem[]>([])
+  const [audioFiles, setAudioFiles] = useState<TrackFileItem[]>([])
 
   // Ошибки валидации
   const [errors, setErrors] = useState<Record<string, string>>({})

@@ -1,4 +1,4 @@
-import { PlatformType } from '@/data/participants'
+import { PlatformType } from '@/widgets/participant-manager'
 
 export interface PlatformInfo {
   id: PlatformType

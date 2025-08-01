@@ -1,18 +1,18 @@
 'use client'
 
-import { User, Settings, AlertCircle } from 'lucide-react'
-import { ValidationModal } from '@/components/features/validation-modal'
+import { Settings } from 'lucide-react'
+import { ReleaseValidationDashboard } from '@/widgets/release-validation-dashboard'
 import { AnimatedInput } from '@/components/ui/animated-input'
-import { EnhancedButton } from '@/components/ui/enhanced-button'
-import { EnhancedFileUpload } from '@/components/ui/enhanced-file-upload'
-import { DraggableArtistItem } from '@/components/ui/draggable-artist-item'
+
+import { TrackCollectionManager } from '@/widgets/track-collection-manager'
+
 
 import { ReleaseFormProvider, useReleaseFormContext } from '@/contexts/release-form-context'
 import EnhancedReleaseFormNavigation from '@/components/release-form/enhanced-release-form-navigation'
 import { BasicInfoSection } from '@/components/release-form/sections/basic-info-section'
 import { ReleaseTypeSection } from '@/components/release-form/sections/release-type-section'
 import { DatesIdentificationSection } from '@/components/release-form/sections/dates-identification-section'
-import { ParticipantsSection } from '@/components/release-form/sections/participants-section'
+import { ParticipantManager } from '@/widgets/participant-manager'
 import { Footer } from '@/components/ui/footer'
 
 function ReleaseFormContent() {
@@ -31,10 +31,7 @@ function ReleaseFormContent() {
 
     // Обработчики
     handleInputChange,
-    updateArtist,
-    addArtist,
-    removeArtist,
-    moveArtist
+    updateArtist
   } = useReleaseFormContext()
 
 
@@ -72,14 +69,18 @@ function ReleaseFormContent() {
               />
 
               {/* Секция: Участники */}
-              <ParticipantsSection 
-                formData={formData}
+              <ParticipantManager 
+                participants={formData.artists}
+                onParticipantsChange={(participants) => {
+                  if (typeof participants === 'function') {
+                    handleInputChange('artists', participants(formData.artists))
+                  } else {
+                    handleInputChange('artists', participants)
+                  }
+                }}
                 errors={errors}
                 onInputChange={handleInputChange}
-                onAddArtist={addArtist}
                 onUpdateArtist={updateArtist}
-                onRemoveArtist={removeArtist}
-                onMoveArtist={moveArtist}
               />
 
               {/* Секция: Дополнительная информация */}
@@ -120,7 +121,7 @@ function ReleaseFormContent() {
                 </h2>
               </div>
 
-              <EnhancedFileUpload
+              <TrackCollectionManager
                 label="Треки релиза"
                 accept="audio/*"
                 multiple={true}
@@ -153,7 +154,7 @@ function ReleaseFormContent() {
 
 
           {/* Модал валидации */}
-          <ValidationModal
+          <ReleaseValidationDashboard
             isOpen={validationOpen}
             onClose={() => setValidationOpen(false)}
             requirements={[]}

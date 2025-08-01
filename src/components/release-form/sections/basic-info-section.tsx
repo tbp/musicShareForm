@@ -1,9 +1,9 @@
 import { AnimatedInput } from '@/components/ui/animated-input'
-import { CoverArtUploader } from '@/components/ui/cover-art-uploader'
+import { ArtworkManager } from '@/widgets/artwork-manager'
 import { SearchableSelect } from '@/components/ui/searchable-select'
 import { RadioGroupWithHints } from '@/components/ui/radio-group-with-hints'
 import { YearCombobox } from '@/components/ui/year-combobox'
-import { FileItem } from '@/components/ui/enhanced-file-upload'
+import type { FileItem } from '@/widgets/artwork-manager'
 import { ReleaseFormData } from '@/types/ddex-release'
 import { GENRES, SUBGENRES } from '@/data/genres'
 import { PARENTAL_ADVISORY_OPTIONS } from '@/constants/release-form'
@@ -27,7 +27,7 @@ export function BasicInfoSection({
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
       {/* Левая колонка - Обложка */}
       <div className="space-y-6">
-        <CoverArtUploader
+        <ArtworkManager
           value={coverArt}
           onFilesChange={onCoverArtChange}
           error={errors.coverArt}
