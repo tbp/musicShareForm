@@ -21,16 +21,14 @@ import {
   DragOverlay,
 } from '@dnd-kit/core'
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
-import { CSS } from '@dnd-kit/utilities'
+
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -67,9 +65,6 @@ function DraggableRow<TData>({
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
-    isDragging,
   } = useSortable({
     id: row.original.id,
   })

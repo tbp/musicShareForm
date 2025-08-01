@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 
-import { Info, Plus, ExternalLink, AlertCircle, Edit3 } from 'lucide-react'
+import { Plus, AlertCircle, Edit3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { searchParticipants, ParticipantSuggestion } from '@/data/participants'
 import { getPlatformInfo } from '@/lib/platforms'
@@ -402,8 +402,8 @@ export function ParticipantAutocomplete({
                       {suggestion.platformLinks && suggestion.platformLinks.length > 0 && (
                         <div className="flex items-center gap-1 ml-3">
                           {suggestion.platformLinks.slice(0, 3).map((link, linkIndex) => {
-                            const PlatformIcon = usePlatformIcon(link.platform)
                             const platformInfo = getPlatformInfo(link.platform)
+                            const PlatformIcon = usePlatformIcon(link.platform)
                             return (
                               <PlatformIcon
                                 key={linkIndex}
@@ -429,8 +429,7 @@ export function ParticipantAutocomplete({
                 <div className="border-t border-border/50">
                   <div
                     data-index={suggestions.length}
-                    onMouseDown={(e) => {
-                      e.preventDefault()
+                    onMouseDown={() => {
                       setIsCreateModalOpen(true)
                       setIsOpen(false)
                     }}
@@ -443,7 +442,7 @@ export function ParticipantAutocomplete({
                   >
                     <Plus className="h-4 w-4 text-primary" />
                     <span className="text-sm text-primary font-medium">
-                      Создать участника "{value}"
+                      Создать участника &quot;{value}&quot;
                     </span>
                   </div>
                 </div>
@@ -452,8 +451,7 @@ export function ParticipantAutocomplete({
               /* Если нет результатов, показываем только кнопку создания */
               <div
                 data-index={0}
-                onMouseDown={(e) => {
-                  e.preventDefault()
+                onMouseDown={() => {
                   setIsCreateModalOpen(true)
                   setIsOpen(false)
                 }}
@@ -466,7 +464,7 @@ export function ParticipantAutocomplete({
               >
                 <Plus className="h-4 w-4 text-primary" />
                 <span className="text-sm text-primary font-medium">
-                  Создать участника "{value}"
+                  Создать участника &quot;{value}&quot;
                 </span>
               </div>
             ) : null}

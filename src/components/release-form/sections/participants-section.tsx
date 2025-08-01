@@ -2,7 +2,7 @@
 
 import React from 'react'
 import dynamic from 'next/dynamic'
-import { Plus, X, Info, HelpCircle } from 'lucide-react'
+import { Plus, X, HelpCircle } from 'lucide-react'
 import { ArtistCredit } from '@/types/ddex-release'
 import { createColumns, ParticipantRow } from '@/components/release-form/participants-table'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,11 +13,7 @@ import { CreateParticipantModal } from '@/components/ui/create-participant-modal
 import { cn } from '@/lib/utils'
 
 // Обертка для таблицы участников без SSR
-interface ParticipantsTableWrapperProps {
-  data: ParticipantRow[]
-  columns: any[]
-  onMoveRow: (activeIndex: number, overIndex: number) => void
-}
+
 
 const ParticipantsTableWrapper = dynamic(
   () => import('./participants-table-wrapper'),
@@ -37,7 +33,7 @@ const ParticipantsTableWrapper = dynamic(
 interface ParticipantsPreviewProps {
   participants: ArtistCredit[]
   formData: { variousArtists?: boolean }
-  onInputChange: (field: string, value: any) => void
+  onInputChange: (field: string, value: unknown) => void
 }
 
 const ParticipantsPreview = React.memo(function ParticipantsPreview({ 
@@ -186,9 +182,9 @@ const ParticipantsTotalFooter = React.memo(function ParticipantsTotalFooter({ pa
           <span className="text-sm font-medium text-foreground">Распределение прав</span>
         </div>
         
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-8 mr-20">
           {/* Авторские права */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4 mr-10">
             <span className="text-xs text-muted-foreground/80">Авторские:</span>
             <div className={cn(
               "text-sm font-medium px-2 py-1 rounded-md text-center min-w-[60px]",
@@ -202,7 +198,7 @@ const ParticipantsTotalFooter = React.memo(function ParticipantsTotalFooter({ pa
           </div>
           
           {/* Смежные права */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mr-2">
             <span className="text-xs text-muted-foreground/80">Смежные:</span>
             <div className={cn(
               "text-sm font-medium px-2 py-1 rounded-md text-center min-w-[60px]",
@@ -237,8 +233,8 @@ interface ParticipantsSectionProps {
     releaseType?: string
     variousArtists?: boolean
   }
-  onInputChange: (field: string, value: any) => void
-  onUpdateArtist: (index: number, field: string, value: any) => void
+  onInputChange: (field: string, value: unknown) => void
+  onUpdateArtist: (index: number, field: string, value: unknown) => void
   onAddArtist: () => void
   onRemoveArtist: (index: number) => void
   onMoveArtist: (fromIndex: number, toIndex: number) => void

@@ -83,8 +83,8 @@ export function ArtistPlatformsPopover({
             <div className="p-2">
               <div className="space-y-1">
                 {platformLinks.map((link, index) => {
-                  const PlatformIcon = usePlatformIcon(link.platform)
                   const platformInfo = getPlatformInfo(link.platform)
+                  const PlatformIcon = usePlatformIcon(link.platform)
                   return (
                     <a
                       key={index}

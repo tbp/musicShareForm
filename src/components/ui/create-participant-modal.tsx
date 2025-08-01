@@ -82,10 +82,13 @@ function PlatformCombobox({ value, onChange, className }: PlatformComboboxProps)
           <div className="flex items-center gap-2 min-w-0">
             {selectedPlatform ? (
               <>
-                {React.createElement(usePlatformIcon(value as PlatformType), {
-                  size: 'md',
-                  'aria-label': selectedPlatform.name
-                })}
+                {(() => {
+                  const PlatformIcon = usePlatformIcon(value as PlatformType)
+                  return React.createElement(PlatformIcon, {
+                    size: 'md',
+                    'aria-label': selectedPlatform.name
+                  })
+                })()}
                 <span className="truncate">{selectedPlatform.name}</span>
               </>
             ) : (
@@ -111,10 +114,13 @@ function PlatformCombobox({ value, onChange, className }: PlatformComboboxProps)
                   }}
                 >
                   <div className="flex items-center gap-2 flex-1">
-                    {React.createElement(usePlatformIcon(platform.id), {
-                      size: 'md',
-                      'aria-label': platform.name
-                    })}
+                    {(() => {
+                      const PlatformIcon = usePlatformIcon(platform.id)
+                      return React.createElement(PlatformIcon, {
+                        size: 'md',
+                        'aria-label': platform.name
+                      })
+                    })()}
                     <span>{platform.name}</span>
                   </div>
                   <Check
