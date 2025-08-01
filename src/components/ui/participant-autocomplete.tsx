@@ -12,6 +12,25 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { usePlatformIcon } from '@/components/shared/icons'
 
+// Компонент для иконки платформы
+function PlatformIcon({ platform, size = "md", className = "", title, ariaLabel }: {
+  platform: string
+  size?: "sm" | "md" | "lg" 
+  className?: string
+  title?: string
+  ariaLabel?: string
+}) {
+  const Icon = usePlatformIcon(platform as any)
+  return (
+    <Icon
+      size={size}
+      className={className}
+      title={title}
+      aria-label={ariaLabel}
+    />
+  )
+}
+
 interface ParticipantAutocompleteProps {
   value: string
   onChange: (value: string) => void
@@ -292,14 +311,14 @@ export function ParticipantAutocomplete({
                 >
                   <div className="flex items-center gap-1 hover:bg-accent/50 rounded px-1 py-0.5 cursor-pointer transition-colors">
                     {selectedParticipant.platformLinks.slice(0, 3).map((link, index) => {
-                      const PlatformIcon = usePlatformIcon(link.platform)
                       const platformInfo = getPlatformInfo(link.platform)
                       return (
                         <PlatformIcon
                           key={index}
+                          platform={link.platform}
                           size="sm"
                           title={platformInfo.name}
-                          aria-label={platformInfo.name}
+                          ariaLabel={platformInfo.name}
                         />
                       )
                     })}
@@ -403,14 +422,14 @@ export function ParticipantAutocomplete({
                         <div className="flex items-center gap-1 ml-3">
                           {suggestion.platformLinks.slice(0, 3).map((link, linkIndex) => {
                             const platformInfo = getPlatformInfo(link.platform)
-                            const PlatformIcon = usePlatformIcon(link.platform)
                             return (
                               <PlatformIcon
                                 key={linkIndex}
+                                platform={link.platform}
                                 size="md"
                                 className="opacity-60"
                                 title={platformInfo.name}
-                                aria-label={platformInfo.name}
+                                ariaLabel={platformInfo.name}
                               />
                             )
                           })}

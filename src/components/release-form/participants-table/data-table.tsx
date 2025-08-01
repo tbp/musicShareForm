@@ -50,7 +50,7 @@ const DragHandleContext = React.createContext<{
 } | null>(null)
 
 // Компонент для draggable строки
-function DraggableRow<TData>({ 
+function DraggableRow({ 
   row, 
   children,
   isActive = false,
@@ -291,7 +291,7 @@ export function ParticipantsDataTable<TData extends { id: string }, TValue>({
               strategy={verticalListSortingStrategy}
             >
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row, index) => {
+                table.getRowModel().rows.map((row) => {
                   const isActive = activeId === row.original.id
                   const isOver = overId === row.original.id
                   

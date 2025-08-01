@@ -29,8 +29,8 @@ export function useReleaseForm() {
       role: 'MainArtist',
       share: 0,
       sequence: 1,
-      copyrightShare: 100,
-      relatedRightsShare: 100
+      copyrightShare: 0,
+      relatedRightsShare: 0
     }],
     copyright: [],
     notes: ''

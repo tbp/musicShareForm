@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { GripVertical, HelpCircle, Trash2, Edit3 } from 'lucide-react'
+import { GripVertical, HelpCircle, Trash2 } from 'lucide-react'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArtistCredit } from '@/types/ddex-release'
 import { PARTICIPANT_ROLES } from '@/constants/release-form'
@@ -14,14 +14,6 @@ import { DragHandleContext } from './data-table'
 
 export type ParticipantRow = ArtistCredit & {
   id: string
-}
-
-interface ParticipantActionsProps {
-  participant: ParticipantRow
-  index: number
-  isLastMainArtist: boolean
-  onUpdate: (index: number, field: string, value: any) => void
-  onRemove: (index: number) => void
 }
 
 // Компонент для ячейки с drag handle
@@ -49,8 +41,8 @@ function ParticipantNameCell({
 }: { 
   participant: ParticipantRow
   index: number
-  onUpdate: (index: number, field: string, value: any) => void
-  onEdit?: (index: number, participant: any) => void
+  onUpdate: (index: number, field: string, value: unknown) => void
+  onEdit?: (index: number, participant: unknown) => void
 }) {
   // Стабильная иконка роли
   const RoleIcon = React.useMemo(() => {
@@ -62,7 +54,7 @@ function ParticipantNameCell({
     onUpdate(index, 'displayName', value)
   }, [onUpdate, index])
 
-  const handleEdit = React.useCallback((participant: any) => {
+  const handleEdit = React.useCallback((participant: unknown) => {
     if (onEdit) {
       onEdit(index, participant)
     }
@@ -90,10 +82,10 @@ function RoleCell({
 }: { 
   participant: ParticipantRow
   index: number
-  onUpdate: (index: number, field: string, value: any) => void
+  onUpdate: (index: number, field: string, value: unknown) => void
   isLastMainArtist: boolean
 }) {
-  const roleOptions = Object.entries(PARTICIPANT_ROLES).map(([key, info]: [string, any]) => ({
+  const roleOptions = Object.entries(PARTICIPANT_ROLES).map(([key, info]: [string, { displayName: string; icon: any }]) => ({
     value: key,
     label: info.displayName
   }))
@@ -117,9 +109,9 @@ export const createColumns = ({
   onRemove,
   onEdit
 }: {
-  onUpdate: (index: number, field: string, value: any) => void
+  onUpdate: (index: number, field: string, value: unknown) => void
   onRemove: (index: number) => void
-  onEdit?: (index: number, participant: any) => void
+  onEdit?: (index: number, participant: unknown) => void
 }): ColumnDef<ParticipantRow>[] => [
   {
     id: "drag",
@@ -205,11 +197,11 @@ export const createColumns = ({
       
       return (
         <NumberInput
-          value={participant.copyrightShare || ''}
+          value={participant.copyrightShare || 0}
           onChange={(value) => onUpdate(index, 'copyrightShare', value)}
           placeholder="0"
-          min={100}
-          max={120}
+          min={0}
+          max={100}
           className="w-40"
         />
       )
@@ -256,8 +248,8 @@ export const createColumns = ({
           value={participant.relatedRightsShare || ''}
           onChange={(value) => onUpdate(index, 'relatedRightsShare', value)}
           placeholder="0"
-          min={100}
-          max={150}
+          min={0}
+          max={100}
           className="w-40"
         />
       )

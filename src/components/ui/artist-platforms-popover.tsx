@@ -1,12 +1,37 @@
 'use client'
 
 import React from 'react'
-import { ExternalLink, Edit3, User, IdCard, Hash } from 'lucide-react'
+import { ExternalLink, Edit3, IdCard, Hash } from 'lucide-react'
 import { ParticipantSuggestion } from '@/data/participants'
 import { getPlatformInfo } from '@/lib/platforms'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { usePlatformIcon } from '@/components/shared/icons'
+import { PlatformLink } from '@/data/participants'
+
+// Компонент для отдельной ссылки на платформу
+function PlatformLinkItem({ link }: { link: PlatformLink }) {
+  const platformInfo = getPlatformInfo(link.platform)
+  const PlatformIcon = usePlatformIcon(link.platform)
+  
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors text-sm group"
+    >
+      <PlatformIcon
+        size="md"
+        className="flex-shrink-0"
+        title={platformInfo.name}
+        aria-label={platformInfo.name}
+      />
+      <span className="flex-1 truncate">{platformInfo.name}</span>
+      <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+    </a>
+  )
+}
 
 interface ArtistPlatformsPopoverProps {
   participant: ParticipantSuggestion
@@ -82,28 +107,9 @@ export function ArtistPlatformsPopover({
           {platformLinks.length > 0 ? (
             <div className="p-2">
               <div className="space-y-1">
-                {platformLinks.map((link, index) => {
-                  const platformInfo = getPlatformInfo(link.platform)
-                  const PlatformIcon = usePlatformIcon(link.platform)
-                  return (
-                    <a
-                      key={index}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors text-sm group"
-                    >
-                      <PlatformIcon
-                        size="md"
-                        className="flex-shrink-0"
-                        title={platformInfo.name}
-                        aria-label={platformInfo.name}
-                      />
-                      <span className="flex-1 truncate">{platformInfo.name}</span>
-                      <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors" />
-                    </a>
-                  )
-                })}
+                {platformLinks.map((link, index) => (
+                  <PlatformLinkItem key={index} link={link} />
+                ))}
               </div>
             </div>
           ) : onEdit && (

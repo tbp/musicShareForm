@@ -59,6 +59,33 @@ function RoleTag({ roleKey }: RoleTagProps) {
   )
 }
 
+// Компонент для иконки платформы в кнопке
+function PlatformIconButton({ platformId }: { platformId: PlatformType }) {
+  const PlatformIcon = usePlatformIcon(platformId)
+  const platformInfo = getPlatformInfo(platformId)
+  
+  return React.createElement(PlatformIcon, {
+    size: 'md',
+    'aria-label': platformInfo.name
+  })
+}
+
+// Компонент для элемента в списке платформ
+function PlatformListItem({ platformId }: { platformId: PlatformType }) {
+  const PlatformIcon = usePlatformIcon(platformId)
+  const platformInfo = getPlatformInfo(platformId)
+  
+  return (
+    <div className="flex items-center gap-2 flex-1">
+      {React.createElement(PlatformIcon, {
+        size: 'md',
+        'aria-label': platformInfo.name
+      })}
+      <span>{platformInfo.name}</span>
+    </div>
+  )
+}
+
 // Компонент для выбора платформы с иконкой
 interface PlatformComboboxProps {
   value: PlatformType | ''
@@ -82,13 +109,7 @@ function PlatformCombobox({ value, onChange, className }: PlatformComboboxProps)
           <div className="flex items-center gap-2 min-w-0">
             {selectedPlatform ? (
               <>
-                {(() => {
-                  const PlatformIcon = usePlatformIcon(value as PlatformType)
-                  return React.createElement(PlatformIcon, {
-                    size: 'md',
-                    'aria-label': selectedPlatform.name
-                  })
-                })()}
+                <PlatformIconButton platformId={value as PlatformType} />
                 <span className="truncate">{selectedPlatform.name}</span>
               </>
             ) : (
@@ -113,16 +134,7 @@ function PlatformCombobox({ value, onChange, className }: PlatformComboboxProps)
                     setOpen(false)
                   }}
                 >
-                  <div className="flex items-center gap-2 flex-1">
-                    {(() => {
-                      const PlatformIcon = usePlatformIcon(platform.id)
-                      return React.createElement(PlatformIcon, {
-                        size: 'md',
-                        'aria-label': platform.name
-                      })
-                    })()}
-                    <span>{platform.name}</span>
-                  </div>
+                  <PlatformListItem platformId={platform.id} />
                   <Check
                     className={cn(
                       "ml-auto h-4 w-4",
