@@ -35,7 +35,7 @@ interface ParticipantAutocompleteProps {
   value: string
   onChange: (value: string) => void
   onSelectParticipant?: (participant: ParticipantSuggestion) => void
-  onEditParticipant?: (participant: ParticipantSuggestion) => void
+  onEditParticipant?: (participant: ParticipantSuggestion | { displayName: string; [key: string]: any }) => void
   placeholder?: string
   className?: string
   disabled?: boolean

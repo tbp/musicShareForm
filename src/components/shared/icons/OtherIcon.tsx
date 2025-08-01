@@ -9,9 +9,11 @@ export function OtherIcon({ size = 'md', className, ...props }: IconProps) {
     lg: 'w-6 h-6'
   }
 
+  const sizeClass = typeof size === 'string' ? sizeClasses[size] : `w-${size} h-${size}`
+
   return (
     <Globe 
-      className={`${sizeClasses[size]} text-muted-foreground ${className || ''}`}
+      className={`${sizeClass} text-muted-foreground ${className || ''}`}
       {...props}
     />
   )

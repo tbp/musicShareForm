@@ -42,7 +42,7 @@ function ParticipantNameCell({
   participant: ParticipantRow
   index: number
   onUpdate: (index: number, field: string, value: unknown) => void
-  onEdit?: (index: number, participant: unknown) => void
+  onEdit?: (index: number, participant: ParticipantRow) => void
 }) {
   // Стабильная иконка роли
   const RoleIcon = React.useMemo(() => {
@@ -54,9 +54,9 @@ function ParticipantNameCell({
     onUpdate(index, 'displayName', value)
   }, [onUpdate, index])
 
-  const handleEdit = React.useCallback((participant: unknown) => {
+  const handleEdit = React.useCallback((participant: any) => {
     if (onEdit) {
-      onEdit(index, participant)
+      onEdit(index, participant as ParticipantRow)
     }
   }, [onEdit, index])
 
@@ -111,7 +111,7 @@ export const createColumns = ({
 }: {
   onUpdate: (index: number, field: string, value: unknown) => void
   onRemove: (index: number) => void
-  onEdit?: (index: number, participant: unknown) => void
+  onEdit?: (index: number, participant: ParticipantRow) => void
 }): ColumnDef<ParticipantRow>[] => [
   {
     id: "drag",
@@ -245,7 +245,7 @@ export const createColumns = ({
       
       return (
         <NumberInput
-          value={participant.relatedRightsShare || ''}
+          value={participant.relatedRightsShare || 0}
           onChange={(value) => onUpdate(index, 'relatedRightsShare', value)}
           placeholder="0"
           min={0}

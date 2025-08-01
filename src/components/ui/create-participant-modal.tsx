@@ -169,7 +169,7 @@ export function CreateParticipantModal({
     ipi: ''
   })
   
-  const [platformLinks, setPlatformLinks] = useState<(PlatformLink & { platform: PlatformType | '' })[]>([])
+  const [platformLinks, setPlatformLinks] = useState<Array<{ platform: PlatformType | '', url: string, verified: boolean }>>([])  
 
   // Сброс формы при открытии/закрытии или загрузка данных для редактирования
   React.useEffect(() => {
@@ -219,7 +219,7 @@ export function CreateParticipantModal({
     }])
   }
 
-  const updatePlatformLink = (index: number, field: keyof (PlatformLink & { platform: PlatformType | '' }), value: any) => {
+  const updatePlatformLink = (index: number, field: keyof { platform: PlatformType | '', url: string, verified: boolean }, value: any) => {
     setPlatformLinks(prev => prev.map((link, i) => 
       i === index ? { ...link, [field]: value } : link
     ))
