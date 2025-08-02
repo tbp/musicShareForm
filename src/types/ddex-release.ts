@@ -153,7 +153,7 @@ export const demoRelease: {
     parentalAdvisory: "NotExplicit",
     label: "IQ",
     artists: [
-      { displayName: "Gaeor", role: "MainArtist", share: 100, sequence: 1 }
+      { displayName: "Gaeor", role: "MainArtist", sequence: 1 }
     ],
     copyright: [
       {
