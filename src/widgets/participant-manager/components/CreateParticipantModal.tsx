@@ -207,11 +207,11 @@ export function CreateParticipantModal({
   }
 
   const addPlatformLink = () => {
-    setPlatformLinks(prev => [...prev, {
+    setPlatformLinks(prev => [{
       platform: '', // Не выбираем платформу по умолчанию
       url: '',
       verified: false
-    }])
+    }, ...prev])
   }
 
   const updatePlatformLink = (index: number, field: keyof { platform: PlatformType | '', url: string, verified: boolean }, value: any) => {

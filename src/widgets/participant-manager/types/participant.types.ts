@@ -55,10 +55,7 @@ export interface ArtistCredit {
   id?: string // Уникальный ID для UI (опциональный для обратной совместимости)
   displayName: string
   role: ParticipantRole
-  share: number // Доля в процентах
   sequence?: number
-  copyrightShare?: number // Доля в авторских правах (до 100%)
-  relatedRightsShare?: number // Доля в смежных правах (до 100%)
 }
 
 export type ParticipantRow = ArtistCredit & {
@@ -111,28 +108,7 @@ export interface ParticipantsTableProps {
 }
 
 // ========== Хуки и состояние ==========
-
-export interface ParticipantManagerState {
-  participants: ArtistCredit[]
-  suggestions: ParticipantSuggestion[]
-  isVariousArtistsEnabled: boolean
-  errors: Record<string, string>
-  selectedParticipant: ParticipantSuggestion | null
-  isCreateModalOpen: boolean
-}
-
-export interface ParticipantManagerActions {
-  addParticipant: (participant: ArtistCredit) => void
-  updateParticipant: (index: number, field: string, value: any) => void
-  removeParticipant: (index: number) => void
-  reorderParticipants: (fromIndex: number, toIndex: number) => void
-  selectParticipant: (participant: ParticipantSuggestion) => void
-  createParticipant: (participant: ParticipantSuggestion) => void
-  editParticipant: (index: number, participant: ParticipantRow) => void
-  toggleVariousArtists: () => void
-  clearErrors: () => void
-  setError: (field: string, error: string) => void
-}
+// Устаревшие интерфейсы удалены - используется Zustand store
 
 // ========== Утилиты и валидация ==========
 
@@ -148,13 +124,7 @@ export interface ParticipantSearchResult {
   total: number
 }
 
-export interface ParticipantStats {
-  total: number
-  byRole: Record<ParticipantRole, number>
-  totalCopyrightShare: number
-  totalRelatedRightsShare: number
-  isComplete: boolean
-}
+
 
 // ========== Экспорт для использования в других частях приложения ==========
 

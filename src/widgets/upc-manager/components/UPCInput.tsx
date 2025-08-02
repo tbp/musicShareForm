@@ -24,6 +24,7 @@ export function UPCInput({
 }: UPCInputProps) {
   const [isFocused, setIsFocused] = React.useState(false)
   const [detectedFormat, setDetectedFormat] = React.useState<string | null>(null)
+  const [isTouched, setIsTouched] = React.useState(false) // Отслеживаем был ли blur
   const inputRef = React.useRef<HTMLInputElement>(null)
   const inputId = React.useId()
 
@@ -37,6 +38,12 @@ export function UPCInput({
     const format = detectFormat(numbers)
     
     setDetectedFormat(format)
+    
+    // Сбрасываем touched состояние при вводе новых символов
+    if (isTouched && numbers.length > value.replace(/\D/g, '').length) {
+      setIsTouched(false)
+    }
+    
     onChange?.(numbers) // Отправляем только цифры в родительский компонент
   }
 
@@ -48,11 +55,30 @@ export function UPCInput({
   // Проверка на правильность неполного ввода
   const hasValidationError = numbers.length > 0 && (
     numbers.length > 13 || // Слишком длинный
-    numbers.length < 8 // Слишком короткий (минимум 8 цифр)
+    (isTouched && numbers.length >= 8 && !detectFormat(numbers)) || // После blur показываем ошибку для неподходящих длин (9-11)
+    (isTouched && numbers.length > 0 && numbers.length < 8) // После blur показываем ошибку для неполных кодов
   )
   
-  // Итоговое состояние ошибки
-  const finalError = error || (hasValidationError ? "Неверный формат UPC кода" : undefined)
+  // Итоговое состояние ошибки  
+  const getErrorMessage = () => {
+    if (error) return error
+    if (!hasValidationError) return undefined
+    
+    // Не показываем ошибку для пустого значения
+    if (numbers.length === 0) return undefined
+    
+    if (numbers.length > 13) return "Слишком много цифр для UPC кода"
+    if (isTouched && numbers.length >= 8 && !detectFormat(numbers)) {
+      return `${numbers.length} цифр не соответствует ни одному формату UPC (8, 12 или 13 цифр)`
+    }
+    if (isTouched && numbers.length > 0 && numbers.length < 8) {
+      return `UPC код слишком короткий (${numbers.length} из минимум 8 цифр)`
+    }
+    
+    return "Неверный формат UPC кода"
+  }
+  
+  const finalError = getErrorMessage()
   
   const isLabelFloating = isFocused || value.length > 0
 
@@ -102,6 +128,7 @@ export function UPCInput({
           }}
           onBlur={() => {
             setIsFocused(false)
+            setIsTouched(true) // Помечаем что поле было затронуто
             onBlur?.()
           }}
           disabled={disabled}

@@ -80,12 +80,27 @@ export const validateUPC = (value: string): UPCValidationResult => {
   const format = detectFormat(numbers)
   
   if (!format) {
+    // Определяем более конкретную ошибку в зависимости от длины
+    let errorMessage: string | undefined
+    
+    if (numbers.length === 0) {
+      // Пустое значение не является ошибкой - позволяем пользователю вводить
+      errorMessage = undefined
+    } else if (numbers.length < 8) {
+      // Промежуточный ввод - не показываем ошибку до достижения минимального размера
+      errorMessage = undefined  
+    } else if (numbers.length > 13) {
+      errorMessage = 'UPC код не может содержать больше 13 цифр'
+    } else {
+      errorMessage = `${numbers.length} цифр не соответствует ни одному формату UPC (8, 12 или 13 цифр)`
+    }
+    
     return {
       isValid: false,
       format: null,
       isComplete: false,
       checksum: false,
-      error: 'Неизвестный формат UPC'
+      error: errorMessage
     }
   }
   

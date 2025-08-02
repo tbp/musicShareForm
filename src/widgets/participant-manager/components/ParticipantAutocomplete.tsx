@@ -130,11 +130,22 @@ export const ParticipantAutocomplete = React.memo(function ParticipantAutocomple
     if (selectedParticipant && value !== selectedParticipant.displayName) {
       // Очищаем если value изменился и не соответствует selectedParticipant
       setSelectedParticipant(null)
-    } else if (!selectedParticipant && value.trim() && suggestions.length > 0) {
-      // ИСПРАВЛЕНИЕ: восстанавливаем selectedParticipant если найден точный матч
-      const exactMatch = suggestions.find(s => s.displayName === value)
-      if (exactMatch) {
-        setSelectedParticipant(exactMatch)
+    } else if (!selectedParticipant && value.trim()) {
+      // Пытаемся восстановить selectedParticipant
+      if (suggestions.length > 0) {
+        // Сначала ищем точное совпадение в suggestions
+        const exactMatch = suggestions.find(s => s.displayName === value)
+        if (exactMatch) {
+          setSelectedParticipant(exactMatch)
+        }
+      } else {
+        // Если нет suggestions, создаем временный объект для участника
+        // (это поможет показать кнопку редактирования для локально созданных участников)
+        setSelectedParticipant({
+          id: `temp-${value}`,
+          displayName: value,
+          roles: ['MainArtist']
+        })
       }
     }
   }, [value, selectedParticipant, suggestions])
@@ -296,81 +307,111 @@ export const ParticipantAutocomplete = React.memo(function ParticipantAutocomple
           />
           
           {/* Иконки платформ ИЛИ кнопка редактирования */}
-          {selectedParticipant ? (
-            // Если есть selectedParticipant - показываем платформы или кнопку редактирования
-            selectedParticipant.platformLinks && selectedParticipant.platformLinks.length > 0 ? (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <ArtistPlatformsPopover 
-                  participant={selectedParticipant}
-                  onEdit={onEditParticipant ? () => onEditParticipant(selectedParticipant) : undefined}
-                >
-                  <div className="flex items-center gap-1 hover:bg-accent/50 rounded px-1 py-0.5 cursor-pointer transition-colors">
-                    {selectedParticipant.platformLinks.slice(0, 3).map((link, index) => {
-                      const platformInfo = getPlatformInfo(link.platform)
-                      return (
-                        <PlatformIcon
-                          key={index}
-                          platform={link.platform}
-                          size="sm"
-                          title={platformInfo.name}
-                          ariaLabel={platformInfo.name}
-                        />
-                      )
-                    })}
-                    {selectedParticipant.platformLinks.length > 3 && (
-                      <span className="text-xs text-muted-foreground font-medium ml-0.5">
-                        +{selectedParticipant.platformLinks.length - 3}
-                      </span>
-                    )}
-                  </div>
-                </ArtistPlatformsPopover>
-              </div>
-            ) : onEditParticipant ? (
-              // Если нет платформ но есть onEdit - показываем кнопку редактирования
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEditParticipant(selectedParticipant)}
-                  className="h-6 w-6 p-0 hover:bg-accent"
-                  title="Редактировать участника"
-                >
-                  <Edit3 className="h-3 w-3" />
-                </Button>
-              </div>
-            ) : null
-          ) : (
-            // Иконка ошибки валидации только если нет selectedParticipant
-            hasValidationError && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button 
-                      type="button"
-                      className="flex items-center justify-center text-destructive hover:text-destructive/80 transition-colors p-0.5 rounded"
-                      aria-label="Ошибка валидации"
+          {(() => {
+            // Если есть selectedParticipant
+            if (selectedParticipant) {
+              // Показываем платформы если есть
+              if (selectedParticipant.platformLinks && selectedParticipant.platformLinks.length > 0) {
+                return (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <ArtistPlatformsPopover 
+                      participant={selectedParticipant}
+                      onEdit={onEditParticipant ? () => onEditParticipant(selectedParticipant) : undefined}
                     >
-                      <AlertCircle className="h-5 w-5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-3" side="top" align="end">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
-                        <p className="text-sm font-medium text-destructive">
-                          Участник должен быть выбран из списка
+                      <div className="flex items-center gap-1 hover:bg-accent/50 rounded px-1 py-0.5 cursor-pointer transition-colors">
+                        {selectedParticipant.platformLinks.slice(0, 3).map((link, index) => {
+                          const platformInfo = getPlatformInfo(link.platform)
+                          return (
+                            <PlatformIcon
+                              key={index}
+                              platform={link.platform}
+                              size="sm"
+                              title={platformInfo.name}
+                              ariaLabel={platformInfo.name}
+                            />
+                          )
+                        })}
+                        {selectedParticipant.platformLinks.length > 3 && (
+                          <span className="text-xs text-muted-foreground font-medium ml-0.5">
+                            +{selectedParticipant.platformLinks.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </ArtistPlatformsPopover>
+                  </div>
+                )
+              }
+              // Если нет платформ но есть onEdit - показываем кнопку редактирования
+              if (onEditParticipant) {
+                return (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditParticipant(selectedParticipant)}
+                      className="h-6 w-6 p-0 hover:bg-accent"
+                      title="Редактировать участника"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )
+              }
+            }
+            
+            // Если нет selectedParticipant, но есть значение и onEditParticipant - показываем кнопку
+            if (value.trim() && onEditParticipant) {
+              return (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEditParticipant({ displayName: value })}
+                    className="h-6 w-6 p-0 hover:bg-accent"
+                    title="Редактировать участника"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                  </Button>
+                </div>
+              )
+            }
+            
+            // Показываем ошибку валидации
+            if (hasValidationError) {
+              return (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button 
+                        type="button"
+                        className="flex items-center justify-center text-destructive hover:text-destructive/80 transition-colors p-0.5 rounded"
+                        aria-label="Ошибка валидации"
+                      >
+                        <AlertCircle className="h-5 w-5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-3" side="top" align="end">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+                          <p className="text-sm font-medium text-destructive">
+                            Участник должен быть выбран из списка
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Введите минимум 2 символа, выберите из предложений или создайте нового участника
                         </p>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        Введите минимум 2 символа, выберите из предложений или создайте нового участника
-                      </p>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )
-          )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )
+            }
+            
+            return null
+          })()}
         </div>
 
         {isOpen && (

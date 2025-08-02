@@ -7,10 +7,7 @@ export interface ArtistCredit {
   id?: string // Уникальный ID для UI (опциональный для обратной совместимости)
   displayName: string
   role: 'MainArtist' | 'FeaturedArtist' | 'Remixer' | 'Producer' | 'Vocalist' | 'Songwriter' | 'Composer' | 'Arranger' | 'MixEngineer' | 'MasteringEngineer'
-  share: number // Доля в процентах
   sequence?: number
-  copyrightShare?: number // Доля в авторских правах (до 100%)
-  relatedRightsShare?: number // Доля в смежных правах (до 100%)
 }
 
 export interface Contributor {

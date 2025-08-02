@@ -67,64 +67,6 @@ export default function EnhancedReleaseFormNavigation() {
             <nav className="flex items-center justify-between py-4">
               {/* Левая часть - табы */}
               <div className="flex items-center">
-                {/* Мобильное меню */}
-                <div className="md:hidden">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-2"
-                        aria-label="Открыть меню"
-                      >
-                        <svg
-                          width={16}
-                          height={16}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="pointer-events-none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M4 12h20"
-                            className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
-                          />
-                          <path
-                            d="M4 12h20"
-                            className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
-                          />
-                          <path
-                            d="M4 12h20"
-                            className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
-                          />
-                        </svg>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-48 p-2" align="start">
-                      <div className="space-y-1">
-                        {navigationLinks.map((link) => (
-                          <button
-                            key={link.key}
-                            onClick={() => setActiveTab(link.key)}
-                            className={`w-full flex items-center gap-2 px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-                              activeTab === link.key
-                                ? 'bg-accent text-accent-foreground'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                            }`}
-                          >
-                            {link.icon}
-                            {link.label}
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
                 {/* Десктопные табы - нативная Origin UI реализация */}
                 <div className="hidden md:flex items-center">
                   {navigationLinks.map((link) => (

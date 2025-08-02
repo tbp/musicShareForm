@@ -28,10 +28,7 @@ export function useReleaseForm() {
       id: crypto.randomUUID(),
       displayName: '',
       role: 'MainArtist',
-      share: 0,
-      sequence: 1,
-      copyrightShare: 0,
-      relatedRightsShare: 0
+      sequence: 1
     }],
     copyright: [],
     notes: ''
@@ -50,11 +47,15 @@ export function useReleaseForm() {
       [field]: value
     }))
     
-    // Очистка ошибки при изменении
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
-    }
-  }, [errors])
+    // Очистка ошибки при изменении (БЕЗ зависимости от errors)
+    setErrors(prev => {
+      if (prev[field]) {
+        const { [field]: removed, ...rest } = prev
+        return rest
+      }
+      return prev
+    })
+  }, [])
 
   const updateArtist = useCallback((index: number, field: string, value: any) => {
     setFormData(prev => ({
@@ -72,10 +73,7 @@ export function useReleaseForm() {
         id: crypto.randomUUID(),
         displayName: '',
         role: 'MainArtist',
-        share: 0,
-        sequence: prev.artists.length + 1,
-        copyrightShare: 0,
-        relatedRightsShare: 0
+        sequence: prev.artists.length + 1
       }]
     }))
   }, [])
@@ -103,7 +101,7 @@ export function useReleaseForm() {
 
 
 
-  // Валидация
+  // Валидация (оптимизированная для предотвращения циклов)
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {}
     
@@ -121,7 +119,7 @@ export function useReleaseForm() {
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [formData, coverArt])
+  }, [formData.title, formData.artists, coverArt.length])
 
   const getValidationProgress = useCallback(() => {
     const requiredFields = [
@@ -132,9 +130,9 @@ export function useReleaseForm() {
     
     const filledFields = requiredFields.filter(field => field).length
     return Math.round((filledFields / requiredFields.length) * 100)
-  }, [formData, coverArt])
+  }, [formData.title, formData.artists, coverArt.length])
 
-  // Проверяем, есть ли изменения в форме
+  // Проверяем, есть ли изменения в форме (оптимизированная версия)
   const hasFormChanges = useCallback(() => {
     return (
       formData.title.trim() !== '' ||
@@ -153,7 +151,12 @@ export function useReleaseForm() {
       coverArt.length > 0 ||
       audioFiles.length > 0
     )
-  }, [formData, coverArt, audioFiles])
+  }, [
+    formData.title, formData.subtitle, formData.releaseType, formData.variousArtists,
+    formData.releaseDate, formData.recordingYear, formData.originalReleaseDate,
+    formData.genre, formData.subGenre, formData.label, formData.upc, formData.notes,
+    formData.artists.length, coverArt.length, audioFiles.length
+  ])
 
   const handleSubmit = async () => {
     if (!validateForm()) return

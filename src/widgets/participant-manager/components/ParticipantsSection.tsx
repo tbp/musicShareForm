@@ -16,6 +16,14 @@ import type {
 } from '../types/participant.types'
 import { CreateParticipantModal } from './CreateParticipantModal'
 import { createColumns } from './ParticipantsTable/columns'
+import { 
+  useParticipants, 
+  useSetParticipants,
+  useUpdateParticipant,
+  useAddParticipant,
+  useRemoveParticipant,
+  useMoveParticipant
+} from '../stores/participant-store'
 
 // Обертка для таблицы участников без SSR
 const ParticipantsTableWrapper = dynamic(
@@ -159,130 +167,85 @@ const ParticipantsPreview = React.memo(function ParticipantsPreview({
   )
 })
 
-// Компонент футера с суммами
-interface ParticipantsTotalFooterProps {
-  participants: ArtistCredit[]
-}
 
-const ParticipantsTotalFooter = React.memo(function ParticipantsTotalFooter({ participants }: ParticipantsTotalFooterProps) {
-  const totalCopyright = participants.reduce((sum, p) => sum + (p.copyrightShare || 0), 0)
-  const totalRelatedRights = participants.reduce((sum, p) => sum + (p.relatedRightsShare || 0), 0)
-
-  const getCopyrightStatus = (total: number) => {
-    if (total === 100) return { color: 'text-green-600', text: 'Корректно', icon: '✓' }
-    if (total > 100) return { color: 'text-red-600', text: 'Превышено', icon: '!' }
-    if (total > 0) return { color: 'text-amber-600', text: 'Неполное', icon: '△' }
-    return { color: 'text-muted-foreground', text: 'Не указано', icon: '○' }
-  }
-
-  const copyrightStatus = getCopyrightStatus(totalCopyright)
-  const relatedRightsStatus = getCopyrightStatus(totalRelatedRights)
-
-  return (
-    <div className="mt-4 p-4 bg-muted/20 rounded-lg border border-border/50">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">Распределение прав</span>
-        </div>
-        
-        <div className="flex items-center gap-8 mr-20">
-          {/* Авторские права */}
-          <div className="flex items-center gap-4 mr-10">
-            <span className="text-xs text-muted-foreground/80">Авторские:</span>
-            <div className={cn(
-              "text-sm font-medium px-2 py-1 rounded-md text-center min-w-[60px]",
-              copyrightStatus.color.includes('green') ? "bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400" :
-              copyrightStatus.color.includes('red') ? "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400" :
-              copyrightStatus.color.includes('amber') ? "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400" :
-              "bg-muted text-muted-foreground"
-            )}>
-              {totalCopyright}%
-            </div>
-          </div>
-          
-          {/* Смежные права */}
-          <div className="flex items-center gap-2 mr-2">
-            <span className="text-xs text-muted-foreground/80">Смежные:</span>
-            <div className={cn(
-              "text-sm font-medium px-2 py-1 rounded-md text-center min-w-[60px]",
-              relatedRightsStatus.color.includes('green') ? "bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400" :
-              relatedRightsStatus.color.includes('red') ? "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400" :
-              relatedRightsStatus.color.includes('amber') ? "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400" :
-              "bg-muted text-muted-foreground"
-            )}>
-              {totalRelatedRights}%
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {(totalCopyright !== 100 || totalRelatedRights !== 100) && (
-        <div className="mt-3 text-xs text-muted-foreground/70 leading-relaxed">
-          {(totalCopyright > 100 || totalRelatedRights > 100) 
-            ? 'Сумма долей превышает 100%. Проверьте распределение прав между участниками.'
-            : 'Сумма долей может быть неполной — это нормально, если не планируете точное распределение доходов.'
-          }
-        </div>
-      )}
-    </div>
-  )
-})
 
 export function ParticipantsSection({
-  participants,
+  participants: externalParticipants,
   onParticipantsChange,
   errors,
   onInputChange,
-  onUpdateArtist
+  onUpdateArtist: _onUpdateArtist
 }: ParticipantsSectionProps) {
+  
+  // Zustand стор для внутреннего состояния виджета
+  const participants = useParticipants()
+  const setParticipants = useSetParticipants()
+  const updateParticipant = useUpdateParticipant()
+  const addParticipant = useAddParticipant()
+  const removeParticipant = useRemoveParticipant()
+  const moveParticipant = useMoveParticipant()
+  
+  // Флаг для предотвращения циклов
+  const [isInitialized, setIsInitialized] = React.useState(false)
+  
+  // Синхронизация с внешним состоянием только при первой загрузке
+  React.useEffect(() => {
+    if (!isInitialized && externalParticipants && externalParticipants.length > 0) {
+      setParticipants(externalParticipants)
+      setIsInitialized(true)
+    }
+  }, [externalParticipants, setParticipants, isInitialized])
+  
+  // Уведомление внешней формы об изменениях (только после инициализации)
+  React.useEffect(() => {
+    if (isInitialized) {
+      onParticipantsChange?.(participants)
+    }
+  }, [participants, onParticipantsChange, isInitialized])
+  
   // Состояние для редактирования участника
   const [editingParticipant, setEditingParticipant] = React.useState<{index: number, participant: ArtistCredit} | null>(null)
 
-  // Обработчик добавления участника (стабилизированный)
+  // Обработчик добавления участника (теперь использует Zustand)
   const handleAddArtist = React.useCallback(() => {
     const newParticipant: ArtistCredit = {
       id: `participant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       displayName: '',
       role: 'MainArtist',
-      share: 0,
-      copyrightShare: 0,
-      relatedRightsShare: 0
+      sequence: participants.length + 1
     }
-    onParticipantsChange((prev: ArtistCredit[]) => [...prev, newParticipant])
-  }, [onParticipantsChange])
+    addParticipant(newParticipant)
+  }, [addParticipant])
 
-  // Обработчик удаления участника (стабилизированный)
+  // Обработчик удаления участника (теперь использует Zustand)
   const handleRemoveArtist = React.useCallback((index: number) => {
-    onParticipantsChange((prev: ArtistCredit[]) => prev.filter((_, i) => i !== index))
-  }, [onParticipantsChange])
+    removeParticipant(index)
+  }, [removeParticipant])
 
-  // Обработчик перемещения участника (стабилизированный)
+  // Обработчик перемещения участника (теперь использует Zustand, с правильными зависимостями)
   const handleMoveArtist = React.useCallback((fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex) return
-    
-    onParticipantsChange((prev: ArtistCredit[]) => {
-      const newParticipants = [...prev]
-      const [movedItem] = newParticipants.splice(fromIndex, 1)
-      newParticipants.splice(toIndex, 0, movedItem)
-      return newParticipants
-    })
-  }, [onParticipantsChange])
+    moveParticipant(fromIndex, toIndex)
+  }, [moveParticipant])
 
-  // Обработчик редактирования участника (стабилизированный)
+  // Обработчик редактирования участника
   const handleEditParticipant = React.useCallback((index: number, participant: ArtistCredit) => {
+    console.log('Edit participant:', index, participant)
     setEditingParticipant({ index, participant })
   }, [])
 
   // Обработчик сохранения изменений участника
   const handleSaveParticipant = React.useCallback((updatedParticipant: any) => {
-    if (editingParticipant) {
-      // Обновляем участника по индексу
-      Object.keys(updatedParticipant).forEach(key => {
-        onUpdateArtist(editingParticipant.index, key, updatedParticipant[key])
-      })
-      setEditingParticipant(null)
-    }
-  }, [editingParticipant, onUpdateArtist])
+    setEditingParticipant(current => {
+      if (current) {
+        // Обновляем участника по индексу через Zustand
+        Object.keys(updatedParticipant).forEach(key => {
+          updateParticipant(current.index, key, updatedParticipant[key])
+        })
+      }
+      return null // Закрываем модальное окно
+    })
+  }, [updateParticipant])
 
   // Преобразуем participants в ParticipantRow, используя стабильные ID из данных
   const participantsData: ParticipantRow[] = React.useMemo(() => 
@@ -291,12 +254,12 @@ export function ParticipantsSection({
       id: artist.id || `legacy-participant-${index}` // Fallback для старых данных
     })), [participants])
 
-  // Создаем колонки с передачей колбеков (мемоизируем для предотвращения перерендеров)
+  // Создаем колонки с передачей колбеков из Zustand (мемоизируем для предотвращения перерендеров)
   const columns = React.useMemo(() => createColumns({
-    onUpdate: onUpdateArtist,
+    onUpdate: updateParticipant,
     onRemove: handleRemoveArtist,
     onEdit: handleEditParticipant
-  }), [onUpdateArtist, handleRemoveArtist, handleEditParticipant])
+  }), [updateParticipant, handleRemoveArtist, handleEditParticipant])
 
   // Формируем данные для различных компонентов
   const formData = React.useMemo(() => ({
@@ -335,9 +298,6 @@ export function ParticipantsSection({
               onMoveRow={handleMoveArtist}
             />
             
-            {/* Футер с суммами */}
-            <ParticipantsTotalFooter participants={participants} />
-            
             {/* Минималистичное превью участников */}
             <ParticipantsPreview 
               participants={participants} 
@@ -366,14 +326,16 @@ export function ParticipantsSection({
       )}
 
       {/* Модальное окно редактирования участника */}
-      <CreateParticipantModal
-        isOpen={!!editingParticipant}
-        onClose={() => setEditingParticipant(null)}
-        onCreateParticipant={handleSaveParticipant}
-        initialDisplayName={editingParticipant?.participant.displayName || ''}
-        initialData={editingParticipant?.participant}
-        mode="edit"
-      />
+      {editingParticipant && (
+        <CreateParticipantModal
+          isOpen={!!editingParticipant}
+          onClose={() => setEditingParticipant(null)}
+          onCreateParticipant={handleSaveParticipant}
+          initialDisplayName={editingParticipant.participant.displayName || ''}
+          initialData={editingParticipant.participant}
+          mode="edit"
+        />
+      )}
     </div>
   )
 }

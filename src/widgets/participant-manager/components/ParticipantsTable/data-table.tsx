@@ -127,15 +127,7 @@ function DragPreview({ item, columns }: DragPreviewProps) {
                         </span>
                       </div>
                     )
-                  case 'copyrightShare':
-                  case 'relatedRightsShare':
-                    return (
-                      <div className="px-2">
-                        <span className="text-sm text-muted-foreground">
-                          {item[column.accessorKey] || 0}%
-                        </span>
-                      </div>
-                    )
+
                   case 'actions':
                     return (
                       <div className="flex justify-center px-2">
@@ -175,7 +167,7 @@ function getColumnWidth(column: any) {
   if (column.size) return `${column.size}px`
   if (column.id === 'drag') return '40px'
   if (column.accessorKey === 'displayName') return '200px'
-  if (column.accessorKey === 'copyrightShare' || column.accessorKey === 'relatedRightsShare') return '65px'
+
   if (column.id === 'actions') return '60px'
   return 'auto'
 }

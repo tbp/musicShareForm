@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback } from 'react'
 import { Settings } from 'lucide-react'
 import { ReleaseValidationDashboard } from '@/widgets/release-validation-dashboard'
 import { AnimatedInput } from '@/components/ui/animated-input'
@@ -33,6 +34,16 @@ function ReleaseFormContent() {
     handleInputChange,
     updateArtist
   } = useReleaseFormContext()
+
+  // Обработчик изменения участников - оптимизирован для предотвращения циклов
+  const handleParticipantsChange = useCallback((participants: any) => {
+    if (typeof participants === 'function') {
+      // Получаем актуальное состояние из formData в момент вызова
+      handleInputChange('artists', (currentArtists: any) => participants(currentArtists))
+    } else {
+      handleInputChange('artists', participants)
+    }
+  }, [handleInputChange])
 
 
 
@@ -71,13 +82,7 @@ function ReleaseFormContent() {
               {/* Секция: Участники */}
               <ParticipantManager 
                 participants={formData.artists}
-                onParticipantsChange={(participants) => {
-                  if (typeof participants === 'function') {
-                    handleInputChange('artists', participants(formData.artists))
-                  } else {
-                    handleInputChange('artists', participants)
-                  }
-                }}
+                onParticipantsChange={handleParticipantsChange}
                 errors={errors}
                 onInputChange={handleInputChange}
                 onUpdateArtist={updateArtist}
