@@ -488,7 +488,7 @@ export function CreateParticipantModal({
               <div className="space-y-3">
                 {platformLinks.map((link, index) => {
                   const platformInfo = getPlatformInfo(link.platform)
-                  const PlatformIcon = platformInfo.icon
+                  const PlatformIcon = usePlatformIcon(link.platform)
                   const isOtherPlatform = link.platform === 'other'
                   const rawDisplayName = isOtherPlatform 
                     ? (link.customName || 'Другая площадка') 
