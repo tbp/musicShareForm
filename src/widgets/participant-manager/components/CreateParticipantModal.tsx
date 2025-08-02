@@ -511,7 +511,7 @@ export function CreateParticipantModal({
                       <div className="relative">
                         {/* Иконка и название платформы слева */}
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 max-w-36 z-10">
-                          <PlatformIcon size="sm" className="flex-shrink-0" />
+                          <PlatformIcon className="flex-shrink-0 h-4 w-4" />
                           
                           {/* Название платформы - inline редактирование для других */}
                           {isOtherPlatform && isEditingName ? (
