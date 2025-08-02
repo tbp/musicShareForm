@@ -7,7 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { GripVertical } from "lucide-react"
+import { GripVertical, Plus } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -35,12 +35,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   onMove: (fromIndex: number, toIndex: number) => void
+  onAddParticipant?: () => void
 }
 
 // Контекст для drag handle props
@@ -176,6 +178,7 @@ export function ParticipantsDataTable<TData extends { id: string }, TValue>({
   columns,
   data,
   onMove,
+  onAddParticipant,
 }: DataTableProps<TData, TValue>) {
   const [activeId, setActiveId] = React.useState<string | null>(null)
   const [overId, setOverId] = React.useState<string | null>(null)
@@ -314,6 +317,21 @@ export function ParticipantsDataTable<TData extends { id: string }, TValue>({
                 </TableRow>
               )}
             </SortableContext>
+            
+            {/* Кнопка добавления участника как часть таблицы */}
+            {onAddParticipant && (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={columns.length} className="h-14 px-4 py-2">
+                  <button 
+                    onClick={onAddParticipant}
+                    className="w-full h-10 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+                  >
+                    <Plus className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                    <span className="text-sm">Добавить участника</span>
+                  </button>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
           </table>
         </div>

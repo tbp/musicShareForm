@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, Trash2, User, Hash, ExternalLink, Check, ChevronsUpDown, Tags } from 'lucide-react'
+import { Plus, Trash2, User, Hash, ExternalLink, Check, ChevronsUpDown, HelpCircle } from 'lucide-react'
 import { getPlatformInfo, PLATFORMS } from '@/lib/platforms'
 import { PARTICIPANT_ROLES } from '../constants/participantRoles'
 import { 
@@ -14,6 +14,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { AnimatedInput } from '@/components/ui/animated-input'
+import { ISNIInput } from './ISNIInput'
+import { IPIInput } from './IPIInput'
 import { 
   Command,
   CommandEmpty,
@@ -49,10 +52,10 @@ function RoleTag({ roleKey }: RoleTagProps) {
   const IconComponent = role.icon
   
   return (
-    <div className="inline-flex items-center gap-1 px-2 py-1 bg-muted/50 text-muted-foreground rounded text-xs border border-border/30">
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-muted/50 text-muted-foreground rounded text-xs border border-border/30">
       <IconComponent className="h-3 w-3" />
-      <span>{role.displayName}</span>
-    </div>
+      {role.displayName}
+    </span>
   )
 }
 
@@ -88,9 +91,11 @@ interface PlatformComboboxProps {
   value: PlatformType | ''
   onChange: (value: PlatformType) => void
   className?: string
+  availablePlatforms?: Array<{ id: PlatformType; name: string }>
 }
 
-function PlatformCombobox({ value, onChange, className }: PlatformComboboxProps) {
+function PlatformCombobox({ value, onChange, className, availablePlatforms }: PlatformComboboxProps) {
+  const platformsToShow = availablePlatforms || Object.values(PLATFORMS)
   const [open, setOpen] = React.useState(false)
   const selectedPlatform = value ? getPlatformInfo(value) : null
 
@@ -101,7 +106,7 @@ function PlatformCombobox({ value, onChange, className }: PlatformComboboxProps)
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("justify-between min-w-0", className)}
+          className={cn("justify-between min-w-0 h-10 px-3 py-2", className)}
         >
           <div className="flex items-center gap-2 min-w-0">
             {selectedPlatform ? (
@@ -122,7 +127,7 @@ function PlatformCombobox({ value, onChange, className }: PlatformComboboxProps)
           <CommandList>
             <CommandEmpty>Платформа не найдена.</CommandEmpty>
             <CommandGroup>
-              {Object.values(PLATFORMS).map((platform) => (
+              {platformsToShow.map((platform) => (
                 <CommandItem
                   key={platform.id}
                   value={platform.id}
@@ -164,7 +169,9 @@ export function CreateParticipantModal({
     ipi: ''
   })
   
-  const [platformLinks, setPlatformLinks] = useState<Array<{ platform: PlatformType | '', url: string, verified: boolean }>>([])  
+  const [platformLinks, setPlatformLinks] = useState<Array<{ platform: PlatformType, url: string, verified: boolean, customName?: string }>>([])
+  const [addPlatformOpen, setAddPlatformOpen] = useState(false)
+  const [editingNameIndex, setEditingNameIndex] = useState<number | null>(null)
 
   // Сброс формы при открытии/закрытии или загрузка данных для редактирования
   React.useEffect(() => {
@@ -177,12 +184,7 @@ export function CreateParticipantModal({
           isni: initialData.isni || '',
           ipi: initialData.ipi || ''
         })
-        setPlatformLinks(initialData.platformLinks || [
-          { platform: '', url: '', verified: false },
-          { platform: '', url: '', verified: false },
-          { platform: '', url: '', verified: false },
-          { platform: '', url: '', verified: false }
-        ])
+        setPlatformLinks(initialData.platformLinks || [])
       } else {
         setFormData({
           displayName: initialDisplayName,
@@ -191,14 +193,22 @@ export function CreateParticipantModal({
           isni: '',
           ipi: ''
         })
-        // По умолчанию добавляем 4 поля без выбранной платформы
-        setPlatformLinks([
-          { platform: '', url: '', verified: false },
-          { platform: '', url: '', verified: false },
-          { platform: '', url: '', verified: false },
-          { platform: '', url: '', verified: false }
-        ])
+        // Для нового участника автоматически добавляем основные платформы
+        const defaultPlatforms: Array<{ platform: PlatformType, url: string, verified: boolean }> = [
+          { platform: 'bandLink', url: '', verified: false },
+          { platform: 'yandex', url: '', verified: false },
+          { platform: 'vk', url: '', verified: false },
+          { platform: 'zvook', url: '', verified: false },
+          { platform: 'appleMusic', url: '', verified: false },
+          { platform: 'spotify', url: '', verified: false },
+          { platform: 'youtubeMusic', url: '', verified: false },
+          { platform: 'deezer', url: '', verified: false }
+        ]
+        setPlatformLinks(defaultPlatforms)
       }
+      // Сброс состояний интерфейса платформ
+      setAddPlatformOpen(false)
+      setEditingNameIndex(null)
     }
   }, [isOpen, initialDisplayName, initialData, mode])
 
@@ -206,18 +216,34 @@ export function CreateParticipantModal({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const addPlatformLink = () => {
-    setPlatformLinks(prev => [{
-      platform: '', // Не выбираем платформу по умолчанию
+  const addPlatformLink = React.useCallback((platformId: PlatformType) => {
+    const newLink = {
+      platform: platformId,
       url: '',
-      verified: false
-    }, ...prev])
-  }
+      verified: false,
+      ...(platformId === 'other' && { customName: '' })
+    }
+    setPlatformLinks(prev => [newLink, ...prev])
+    setAddPlatformOpen(false)
+  }, [])
 
-  const updatePlatformLink = (index: number, field: keyof { platform: PlatformType | '', url: string, verified: boolean }, value: any) => {
-    setPlatformLinks(prev => prev.map((link, i) => 
-      i === index ? { ...link, [field]: value } : link
-    ))
+
+
+  // Получаем список доступных платформ (исключая уже добавленные, кроме "other")
+  const getAvailablePlatforms = React.useCallback(() => {
+    const usedPlatforms = platformLinks.map(link => link.platform)
+    return Object.values(PLATFORMS).filter(platform => 
+      !usedPlatforms.includes(platform.id) || platform.id === 'other'
+    )
+  }, [platformLinks])
+
+  const updatePlatformLink = (index: number, field: keyof { platform: PlatformType, url: string, verified: boolean, customName?: string }, value: any) => {
+    // Можно обновлять только URL, verified и customName, platform менять нельзя
+    if (field !== 'platform') {
+      setPlatformLinks(prev => prev.map((link, i) => 
+        i === index ? { ...link, [field]: value } : link
+      ))
+    }
   }
 
   const removePlatformLink = (index: number) => {
@@ -240,11 +266,12 @@ export function CreateParticipantModal({
       ipi: formData.ipi.trim() || undefined,
       roles: ['MainArtist'], // Фиксированная роль, устанавливается пользователем при добавлении в трек
       platformLinks: platformLinks
-        .filter(link => link.url.trim() && link.platform)
+        .filter(link => link.url.trim())
         .map(link => ({
-          platform: link.platform as PlatformType,
+          platform: link.platform,
           url: link.url,
-          verified: link.verified
+          verified: link.verified,
+          ...(link.platform === 'other' && link.customName && { customName: link.customName })
         }))
     }
 
@@ -281,92 +308,130 @@ export function CreateParticipantModal({
 
         {/* Скроллируемый контент с кастомным скроллом */}
         <div className="flex-1 overflow-y-auto px-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border hover:scrollbar-thumb-border/80">
-          <form id="create-participant-form" onSubmit={handleSubmit} className="space-y-6 pb-6">
+          <form id="create-participant-form" onSubmit={handleSubmit} className="space-y-6 pb-6 pt-6">
 
-          {/* Роли участника в виде тегов */}
-          {relevantRoles.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                <Tags className="h-4 w-4" />
-                Роли в проектах
-              </h3>
-              
-              <div className="flex flex-wrap gap-2">
-                {relevantRoles.map(roleKey => (
-                  <RoleTag key={roleKey} roleKey={roleKey} />
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {/* Основная информация */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Основная информация
-            </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Имя артиста *</Label>
-                <Input
+              <div>
+                <AnimatedInput
                   id="displayName"
+                  label="Имя артиста"
                   value={formData.displayName}
                   onChange={(e) => handleInputChange('displayName', e.target.value)}
-                  placeholder="Например: Gaeor"
+                  placeholder="Gaeor"
                   required
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="realName">Настоящее имя</Label>
-                <Input
+              <div>
+                <AnimatedInput
                   id="realName"
+                  label="Настоящее имя"
                   value={formData.realName}
                   onChange={(e) => handleInputChange('realName', e.target.value)}
-                  placeholder="Например: Георгий Акопов"
+                  placeholder="Георгий Акопов"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Описание</Label>
-              <Input
+            <div className="relative">
+              <textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Например: Артист, композитор, продюсер"
+                onChange={(e) => {
+                  handleInputChange('description', e.target.value)
+                  // Автоматическое изменение высоты
+                  const target = e.target as HTMLTextAreaElement
+                  target.style.height = 'auto'
+                  target.style.height = Math.min(target.scrollHeight, 100) + 'px'
+                }}
+                placeholder=" "
+                rows={1}
+                className="peer w-full bg-background border border-input rounded-lg px-3 pt-6 pb-2 text-foreground placeholder:text-transparent placeholder-shown:border-input transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary resize-none overflow-y-auto min-h-[2.5rem] max-h-[100px] leading-normal"
+                style={{ height: 'auto' }}
               />
+              <label
+                htmlFor="description"
+                className="absolute left-3 transition-all duration-200 ease-out pointer-events-none text-muted-foreground bg-background px-1 select-none top-0 -translate-y-1/2 text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:text-xs peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base"
+              >
+                Примечание
+              </label>
             </div>
+
+            {/* Роли участника в виде тегов */}
+            {relevantRoles.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Роли в треках:</div>
+                <div className="flex flex-wrap gap-2">
+                  {relevantRoles.map(roleKey => (
+                    <RoleTag key={roleKey} roleKey={roleKey} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Профессиональные идентификаторы */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Hash className="h-4 w-4" />
-              Профессиональные идентификаторы
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                <Hash className="h-4 w-4" />
+                Профессиональные идентификаторы
+              </h3>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button 
+                    type="button"
+                    className="text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 text-xs" side="right" align="start">
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-medium text-foreground mb-1">ISNI (International Standard Name Identifier)</h4>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Международный стандартный идентификатор имени. Уникальный номер, который присваивается 
+                        авторам, исполнителям и другим участникам творческой индустрии.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground mb-1">IPI (Interested Parties Information)</h4>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Международный идентификатор заинтересованных сторон. Используется для идентификации 
+                        авторов и издателей в системах управления правами.
+                      </p>
+                    </div>
+                    <div className="pt-2 border-t border-border">
+                      <p className="text-muted-foreground/80 text-xs">
+                        Эти идентификаторы помогают точно идентифицировать участников и упрощают 
+                        распределение авторских отчислений.
+                      </p>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="isni">ISNI</Label>
-                <Input
+              <div>
+                <ISNIInput
                   id="isni"
                   value={formData.isni}
                   onChange={(e) => handleInputChange('isni', e.target.value)}
-                  placeholder="0000-0001-2345-6789"
-                  pattern="\d{4}-\d{4}-\d{4}-\d{4}"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="ipi">IPI</Label>
-                <Input
+              <div>
+                <IPIInput
                   id="ipi"
                   value={formData.ipi}
                   onChange={(e) => handleInputChange('ipi', e.target.value)}
-                  placeholder="00123456789"
-                  pattern="\d{11}"
                 />
               </div>
             </div>
@@ -379,72 +444,168 @@ export function CreateParticipantModal({
                 <ExternalLink className="h-4 w-4" />
                 Ссылки на площадки
               </h3>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addPlatformLink}
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-3 w-3" />
-                Добавить ссылку
-              </Button>
+              
+              {/* Combobox для добавления площадки в один клик */}
+              {getAvailablePlatforms().length > 0 && (
+                <Popover open={addPlatformOpen} onOpenChange={setAddPlatformOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Добавить площадку
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[200px] p-0" align="end">
+                    <Command>
+                      <CommandInput placeholder="Поиск площадки..." />
+                      <CommandList>
+                        <CommandEmpty>Площадка не найдена.</CommandEmpty>
+                        <CommandGroup>
+                          {getAvailablePlatforms().map((platform) => (
+                            <CommandItem
+                              key={platform.id}
+                              value={platform.id}
+                              onSelect={() => addPlatformLink(platform.id)}
+                              className="cursor-pointer"
+                            >
+                              <PlatformListItem platformId={platform.id} />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
 
-            {platformLinks.length > 0 && (
+            {/* Список добавленных площадок */}
+            {platformLinks.length > 0 ? (
               <div className="space-y-3">
-                {platformLinks.map((link, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 border border-border rounded-lg">
-                      <div className="flex items-start gap-3 min-w-0 flex-1">
-                        {/* Платформа - шире */}
-                        <div className="w-48">
-                          <PlatformCombobox
-                            value={link.platform}
-                            onChange={(value) => updatePlatformLink(index, 'platform', value)}
-                            className="w-full"
-                          />
+                {platformLinks.map((link, index) => {
+                  const platformInfo = getPlatformInfo(link.platform)
+                  const PlatformIcon = usePlatformIcon(link.platform)
+                  const isOtherPlatform = link.platform === 'other'
+                  const rawDisplayName = isOtherPlatform 
+                    ? (link.customName || 'Другая площадка') 
+                    : platformInfo.name
+                  
+                  // Ограничиваем отображаемое название до 15 символов
+                  const displayName = rawDisplayName.length > 15 
+                    ? rawDisplayName.slice(0, 15) + '...' 
+                    : rawDisplayName
+                  
+                  const placeholderName = isOtherPlatform 
+                    ? (link.customName?.slice(0, 15) || 'площадку') 
+                    : platformInfo.name.slice(0, 15)
+                  
+                  const isEditingName = editingNameIndex === index
+                  
+                  return (
+                    <div key={index} className="relative">
+                      {/* Input с иконкой платформы внутри */}
+                      <div className="relative">
+                        {/* Иконка и название платформы слева */}
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 max-w-36 z-10">
+                          <PlatformIcon size="sm" className="flex-shrink-0" />
+                          
+                          {/* Название платформы - inline редактирование для других */}
+                          {isOtherPlatform && isEditingName ? (
+                            <input
+                              value={link.customName || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.slice(0, 15) // Ограничиваем до 15 символов
+                                updatePlatformLink(index, 'customName', value)
+                              }}
+                              onBlur={() => setEditingNameIndex(null)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === 'Escape') {
+                                  setEditingNameIndex(null)
+                                }
+                              }}
+                              placeholder="Название..."
+                              maxLength={15}
+                              className="text-sm font-medium text-foreground bg-transparent border-none outline-none p-0 w-24"
+                              autoFocus
+                            />
+                          ) : (
+                            <span 
+                              className={cn(
+                                "text-sm font-medium truncate",
+                                isOtherPlatform 
+                                  ? "cursor-pointer hover:text-foreground transition-colors text-muted-foreground" 
+                                  : "text-muted-foreground",
+                                isOtherPlatform && !link.customName && "text-muted-foreground/70 italic"
+                              )}
+                              onClick={() => isOtherPlatform && setEditingNameIndex(index)}
+                              title={isOtherPlatform ? (link.customName ? `Редактировать: ${rawDisplayName}` : "Задать название") : undefined}
+                            >
+                              {isOtherPlatform && !link.customName ? "Задать название" : displayName}
+                            </span>
+                          )}
                         </div>
                         
-                        {/* Ссылка - уже */}
-                        <div className="flex-1">
-                          <div className="relative">
-                            <Input
-                              value={link.url}
-                              onChange={(e) => updatePlatformLink(index, 'url', e.target.value)}
-                              placeholder="https://..."
-                              className="pr-10"
-                            />
-                            
-                            {/* Кнопка перехода по ссылке - встроенная иконка */}
-                            {link.url.trim() && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-1 top-1 h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                                onClick={() => window.open(link.url, '_blank')}
-                                title="Открыть ссылку"
-                              >
-                                <ExternalLink className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
+                        {/* Input с отступом для иконки и кнопок */}
+                        <Input
+                          value={link.url}
+                          onChange={(e) => updatePlatformLink(index, 'url', e.target.value)}
+                          placeholder={`Ссылка на ${placeholderName}...`}
+                          className="pl-40 pr-20"
+                        />
+                        
+                        {/* Кнопки справа */}
+                        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                          {/* Кнопка перехода по ссылке */}
+                          {link.url.trim() && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                              onClick={() => window.open(link.url, '_blank')}
+                              title="Открыть ссылку"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+                          
+                          {/* Кнопка удаления */}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removePlatformLink(index)}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            title="Удалить площадку"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
-                      
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removePlatformLink(index)}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive mt-1"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   )
-                )}
+                })}
               </div>
+            ) : (
+              // Состояние когда нет ни одной площадки
+              <div className="text-center py-8 border-2 border-dashed border-border/50 rounded-lg bg-muted/20">
+                <ExternalLink className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground mb-2">Ссылки на площадки не добавлены</p>
+                <p className="text-xs text-muted-foreground/70 max-w-xs mx-auto leading-relaxed">
+                  Используйте кнопку "Добавить площадку" чтобы указать профили участника на музыкальных сервисах
+                </p>
+              </div>
+            )}
+            
+            {/* Подсказка когда все платформы добавлены */}
+            {getAvailablePlatforms().length === 0 && platformLinks.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Все доступные площадки добавлены
+              </p>
             )}
           </div>
 

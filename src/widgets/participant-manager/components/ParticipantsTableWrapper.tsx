@@ -8,18 +8,21 @@ interface ParticipantsTableWrapperProps {
   data: ParticipantRow[]
   columns: any[]
   onMoveRow: (activeIndex: number, overIndex: number) => void
+  onAddParticipant?: () => void
 }
 
 export default function ParticipantsTableWrapper({
   data,
   columns,
-  onMoveRow
+  onMoveRow,
+  onAddParticipant
 }: ParticipantsTableWrapperProps) {
   return (
     <ParticipantsDataTable
       data={data}
       columns={columns}
       onMove={onMoveRow}
+      onAddParticipant={onAddParticipant}
     />
   )
 }

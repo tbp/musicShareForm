@@ -33,20 +33,4 @@ type FloatingLabelInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   required?: boolean
 }
 
-const FloatingLabelInput = React.forwardRef<
-  React.ElementRef<typeof FloatingInput>,
-  React.PropsWithoutRef<FloatingLabelInputProps>
->(({ id, label, required = false, ...props }, ref) => {
-  return (
-    <div className="relative">
-      <FloatingInput ref={ref} id={id} {...props} />
-      <FloatingLabel htmlFor={id}>
-        {label}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </FloatingLabel>
-    </div>
-  )
-})
-FloatingLabelInput.displayName = 'FloatingLabelInput'
-
-export { FloatingInput, FloatingLabel, FloatingLabelInput } 
+export { FloatingInput, FloatingLabel } 

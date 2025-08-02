@@ -2,8 +2,8 @@
 
 import React from 'react'
 import dynamic from 'next/dynamic'
-import { Plus, X, HelpCircle } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import { X, HelpCircle } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -236,16 +236,15 @@ export function ParticipantsSection({
 
   // Обработчик сохранения изменений участника
   const handleSaveParticipant = React.useCallback((updatedParticipant: any) => {
-    setEditingParticipant(current => {
-      if (current) {
-        // Обновляем участника по индексу через Zustand
-        Object.keys(updatedParticipant).forEach(key => {
-          updateParticipant(current.index, key, updatedParticipant[key])
-        })
-      }
-      return null // Закрываем модальное окно
-    })
-  }, [updateParticipant])
+    if (editingParticipant) {
+      // Сначала обновляем участника через Zustand
+      Object.keys(updatedParticipant).forEach(key => {
+        updateParticipant(editingParticipant.index, key, updatedParticipant[key])
+      })
+    }
+    // Затем закрываем модальное окно
+    setEditingParticipant(null)
+  }, [editingParticipant, updateParticipant])
 
   // Преобразуем participants в ParticipantRow, используя стабильные ID из данных
   const participantsData: ParticipantRow[] = React.useMemo(() => 
@@ -268,24 +267,12 @@ export function ParticipantsSection({
 
   return (
     <div className="space-y-6">
-      {/* Заголовок и кнопка добавления */}
-      <div className="flex items-end justify-between">
-        <div className="space-y-1">
-          <h2 className="text-xl font-semibold text-foreground">Участники</h2>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Укажите всех участников релиза и их роли. Доли в правах можно не заполнять, если не планируете точное распределение доходов.
-          </p>
-        </div>
-        
-        <Button 
-          onClick={handleAddArtist} 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-2 flex-shrink-0 ml-6 hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all duration-200 group"
-        >
-          <Plus className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-          Добавить участника
-        </Button>
+      {/* Заголовок */}
+      <div className="space-y-1">
+        <h2 className="text-xl font-semibold text-foreground">Участники</h2>
+        <p className="text-sm text-muted-foreground max-w-2xl">
+          Укажите всех участников релиза и их роли. Доли в правах можно не заполнять, если не планируете точное распределение доходов.
+        </p>
       </div>
 
       {/* Таблица участников */}
@@ -296,6 +283,7 @@ export function ParticipantsSection({
               columns={columns}
               data={participantsData}
               onMoveRow={handleMoveArtist}
+              onAddParticipant={handleAddArtist}
             />
             
             {/* Минималистичное превью участников */}
@@ -306,14 +294,12 @@ export function ParticipantsSection({
             />
           </div>
         ) : (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="text-muted-foreground">
-                <p className="text-sm">Участники не добавлены</p>
-                <p className="text-xs mt-1">Нажмите кнопку справа для добавления участника</p>
-              </div>
-            </CardContent>
-          </Card>
+          <ParticipantsTableWrapper
+            columns={columns}
+            data={[]}
+            onMoveRow={handleMoveArtist}
+            onAddParticipant={handleAddArtist}
+          />
         )}
       </div>
 
