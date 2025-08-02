@@ -200,7 +200,16 @@ export function ParticipantsSection({
       sequence: participants.length + 1
     }
     addParticipant(newParticipant)
-  }, [addParticipant])
+    
+    // Ставим фокус в input нового участника
+    setTimeout(() => {
+      const newRowIndex = participants.length // Индекс новой строки
+      const input = document.querySelector(`[data-row-index="${newRowIndex}"] input`) as HTMLInputElement
+      if (input) {
+        input.focus()
+      }
+    }, 100)
+  }, [addParticipant, participants.length])
 
   // Обработчик удаления участника (теперь использует Zustand)
   const handleRemoveArtist = React.useCallback((index: number) => {

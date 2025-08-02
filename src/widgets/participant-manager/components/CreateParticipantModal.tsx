@@ -172,6 +172,7 @@ export function CreateParticipantModal({
   const [platformLinks, setPlatformLinks] = useState<Array<{ platform: PlatformType, url: string, verified: boolean, customName?: string }>>([])
   const [addPlatformOpen, setAddPlatformOpen] = useState(false)
   const [editingNameIndex, setEditingNameIndex] = useState<number | null>(null)
+  const [lastAddedPlatformIndex, setLastAddedPlatformIndex] = useState<number | null>(null)
 
   // Сброс формы при открытии/закрытии или загрузка данных для редактирования
   React.useEffect(() => {
@@ -209,6 +210,7 @@ export function CreateParticipantModal({
       // Сброс состояний интерфейса платформ
       setAddPlatformOpen(false)
       setEditingNameIndex(null)
+      setLastAddedPlatformIndex(null)
     }
   }, [isOpen, initialDisplayName, initialData, mode])
 
@@ -223,11 +225,13 @@ export function CreateParticipantModal({
       verified: false,
       ...(platformId === 'other' && { customName: '' })
     }
-    setPlatformLinks(prev => [newLink, ...prev])
+    setPlatformLinks(prev => {
+      const newLinks = [newLink, ...prev]
+      setLastAddedPlatformIndex(0) // Новая площадка всегда добавляется в начало
+      return newLinks
+    })
     setAddPlatformOpen(false)
   }, [])
-
-
 
   // Получаем список доступных платформ (исключая уже добавленные, кроме "other")
   const getAvailablePlatforms = React.useCallback(() => {
@@ -236,6 +240,19 @@ export function CreateParticipantModal({
       !usedPlatforms.includes(platform.id) || platform.id === 'other'
     )
   }, [platformLinks])
+
+  // Фокус в input ссылки после добавления площадки
+  React.useEffect(() => {
+    if (lastAddedPlatformIndex !== null) {
+      setTimeout(() => {
+        const urlInput = document.querySelector(`[data-platform-index="${lastAddedPlatformIndex}"] input[placeholder*="Ссылка"]`) as HTMLInputElement
+        if (urlInput) {
+          urlInput.focus()
+        }
+        setLastAddedPlatformIndex(null)
+      }, 100)
+    }
+  }, [lastAddedPlatformIndex])
 
   const updatePlatformLink = (index: number, field: keyof { platform: PlatformType, url: string, verified: boolean, customName?: string }, value: any) => {
     // Можно обновлять только URL, verified и customName, platform менять нельзя
@@ -454,6 +471,15 @@ export function CreateParticipantModal({
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-2"
+                      onClick={() => {
+                        const availablePlatforms = getAvailablePlatforms()
+                        // Если остается только "другая" площадка - добавляем её сразу
+                        if (availablePlatforms.length === 1 && availablePlatforms[0].id === 'other') {
+                          addPlatformLink('other')
+                        } else {
+                          setAddPlatformOpen(true)
+                        }
+                      }}
                     >
                       <Plus className="h-3 w-3" />
                       Добавить площадку
@@ -506,7 +532,7 @@ export function CreateParticipantModal({
                   const isEditingName = editingNameIndex === index
                   
                   return (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative" data-platform-index={index}>
                       {/* Input с иконкой платформы внутри */}
                       <div className="relative">
                         {/* Иконка и название платформы слева */}

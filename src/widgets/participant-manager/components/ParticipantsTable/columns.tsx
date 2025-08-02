@@ -58,15 +58,17 @@ const ParticipantNameCell = React.memo(function ParticipantNameCell({
   }, [onEdit, index])
 
   return (
-    <ParticipantAutocomplete
-      icon={RoleIcon}
-      placeholder="Введите имя участника"
-      value={participant.displayName}
-      onChange={handleUpdate}
-      onEditParticipant={onEdit ? handleEdit : undefined}
-      showValidationError={true}
-      className="h-10"
-    />
+    <div data-row-index={index}>
+      <ParticipantAutocomplete
+        icon={RoleIcon}
+        placeholder="Введите имя участника"
+        value={participant.displayName}
+        onChange={handleUpdate}
+        onEditParticipant={onEdit ? handleEdit : undefined}
+        showValidationError={true}
+        className="h-10"
+      />
+    </div>
   )
 }, (prevProps, nextProps) => {
   // Кастомный comparator: сравниваем только важные поля, игнорируем функции
