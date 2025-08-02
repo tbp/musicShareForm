@@ -97,35 +97,17 @@ const ParticipantsPreview = React.memo(function ParticipantsPreview({
     return artistString
   }
 
-  // Показываем переключатель только если есть завершенные участники
-  const shouldShowVariousArtistsToggle = completedMainArtists.length > 1
+  // Показываем переключатель только при 3+ участниках
+  const shouldShowVariousArtistsToggle = completedMainArtists.length >= 3
 
   // Убираем автоматическое включение Various Artists
   // Пользователь может включить сам при необходимости
 
   return (
-    <div className="mt-6 space-y-3">
-      {/* Нейтральный блок-превью */}
-      <div className="bg-muted/30 border border-border/50 rounded-md px-4 py-3">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Отображение на площадках
-          </span>
-        </div>
-        
-        <div className="text-sm text-foreground font-medium">
-          {formatArtistDisplay()}
-        </div>
-      </div>
-        
-      {/* Полезная подсказка для завершенных участников */}
+    <div className="mt-6">
+      {/* Легкий превью отображения */}
       <div className="text-xs text-muted-foreground/60 leading-relaxed">
-        {completedFeaturedArtists.length > 0 
-          ? `Приглашённые артисты (${completedFeaturedArtists.length}): ${completedFeaturedArtists.map(a => a.displayName).join(', ')}`
-          : completedMainArtists.length > 1 
-            ? "Несколько основных артистов — рассмотрите включение режима 'Various Artists'"
-            : "Добавьте участников через автокомплит для отображения превью"
-        }
+        <span className="text-muted-foreground/70">Отображение на площадках:</span> {formatArtistDisplay()}
       </div>
         
       {shouldShowVariousArtistsToggle && (
@@ -151,8 +133,8 @@ const ParticipantsPreview = React.memo(function ParticipantsPreview({
               <div className="space-y-2">
                 <h4 className="font-medium text-foreground">Various Artists</h4>
                 <p className="text-muted-foreground leading-relaxed">
-                  Используется для сборников с множеством разных исполнителей. 
-                  Автоматически активируется при добавлении 4+ основных артистов.
+                  Используется для сборников с множеством разных исполнителей (3+). 
+                  Включите эту опцию для компиляций или сборников различных артистов.
                 </p>
                 <ul className="text-muted-foreground/80 space-y-0.5 ml-3 text-xs">
                   <li>• Помогает площадкам правильно категоризировать релиз</li>
@@ -205,6 +187,9 @@ export function ParticipantsSection({
   
   // Состояние для редактирования участника
   const [editingParticipant, setEditingParticipant] = React.useState<{index: number, participant: ArtistCredit} | null>(null)
+  
+  // Локальное состояние для Various Artists
+  const [variousArtists, setVariousArtists] = React.useState(false)
 
   // Обработчик добавления участника (теперь использует Zustand)
   const handleAddArtist = React.useCallback(() => {
@@ -262,8 +247,17 @@ export function ParticipantsSection({
 
   // Формируем данные для различных компонентов
   const formData = React.useMemo(() => ({
-    variousArtists: false // Может быть передано через props если нужно
-  }), [])
+    variousArtists: variousArtists
+  }), [variousArtists])
+  
+  // Обработчик изменения локальных полей формы
+  const handleLocalInputChange = React.useCallback((field: string, value: any) => {
+    if (field === 'variousArtists') {
+      setVariousArtists(value)
+    }
+    // Передаем изменение в родительский компонент
+    onInputChange(field, value)
+  }, [onInputChange])
 
   return (
     <div className="space-y-6">
@@ -290,7 +284,7 @@ export function ParticipantsSection({
             <ParticipantsPreview 
               participants={participants} 
               formData={formData}
-              onInputChange={onInputChange}
+              onInputChange={handleLocalInputChange}
             />
           </div>
         ) : (
