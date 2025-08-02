@@ -488,7 +488,7 @@ export function CreateParticipantModal({
               <div className="space-y-3">
                 {platformLinks.map((link, index) => {
                   const platformInfo = getPlatformInfo(link.platform)
-                  const PlatformIcon = usePlatformIcon(link.platform)
+                  const PlatformIcon = platformInfo.icon
                   const isOtherPlatform = link.platform === 'other'
                   const rawDisplayName = isOtherPlatform 
                     ? (link.customName || 'Другая площадка') 
@@ -511,7 +511,9 @@ export function CreateParticipantModal({
                       <div className="relative">
                         {/* Иконка и название платформы слева */}
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 max-w-36 z-10">
-                          <PlatformIcon size="sm" className="flex-shrink-0" />
+                          <div className="flex-shrink-0 h-4 w-4">
+                            <PlatformIcon />
+                          </div>
                           
                           {/* Название платформы - inline редактирование для других */}
                           {isOtherPlatform && isEditingName ? (
@@ -596,7 +598,7 @@ export function CreateParticipantModal({
                 <ExternalLink className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground mb-2">Ссылки на площадки не добавлены</p>
                 <p className="text-xs text-muted-foreground/70 max-w-xs mx-auto leading-relaxed">
-                  Используйте кнопку "Добавить площадку" чтобы указать профили участника на музыкальных сервисах
+                  Используйте кнопку &quot;Добавить площадку&quot; чтобы указать профили участника на музыкальных сервисах
                 </p>
               </div>
             )}
