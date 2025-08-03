@@ -29,10 +29,20 @@ export function YearCombobox({
 }: YearComboboxProps) {
   const [isFocused, setIsFocused] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const blurTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   const inputId = React.useId()
   
   const currentYear = new Date().getFullYear()
   
+  // Очистка таймера при размонтировании
+  React.useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current)
+      }
+    }
+  }, [])
+
   // Компактные варианты годов
   const quickYears = React.useMemo(() => [
     { value: currentYear.toString(), label: currentYear.toString(), isCurrent: true },
@@ -52,7 +62,7 @@ export function YearCombobox({
   }
 
   const isLabelFloating = isFocused || value.length > 0
-  const showQuickTags = !isFocused && value.length === 0
+  const showQuickTags = value.length === 0
 
   return (
     <div className={cn('relative', className)}>
@@ -92,8 +102,17 @@ export function YearCombobox({
           type="text"
           value={value}
           onChange={handleInputChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={() => {
+            if (blurTimeoutRef.current) {
+              clearTimeout(blurTimeoutRef.current)
+              blurTimeoutRef.current = null
+            }
+            setIsFocused(true)
+          }}
+          onBlur={() => {
+            // Небольшая задержка для обработки кликов по быстрым вариантам
+            blurTimeoutRef.current = setTimeout(() => setIsFocused(false), 150)
+          }}
           disabled={disabled}
           placeholder={label ? ' ' : placeholder || `${currentYear}`}
           className={cn(
@@ -117,12 +136,22 @@ export function YearCombobox({
               <button
                 key={year.value}
                 type="button"
-                onClick={() => handleYearSelect(year.value)}
+                tabIndex={0}
+                onMouseDown={(e) => {
+                  e.preventDefault() // Предотвращаем потерю фокуса
+                  handleYearSelect(year.value)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleYearSelect(year.value)
+                  }
+                }}
                 className={cn(
                   'px-2 py-1 text-xs font-mono rounded transition-all duration-150',
                   'text-muted-foreground border border-transparent',
                   'hover:text-foreground hover:border-border hover:bg-accent/50',
-                  'focus:text-foreground focus:border-border focus:bg-accent/50 focus:outline-none',
+                  'focus:text-foreground focus:border-border focus:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring/50',
                   'active:scale-95'
                 )}
               >

@@ -65,19 +65,12 @@ function ReleaseFormContent() {
                 onInputChange={handleInputChange}
                 onCoverArtChange={setCoverArt}
               />
-
               <ReleaseTypeSection
                 formData={formData}
                 errors={errors}
                 onInputChange={handleInputChange}
               />
 
-              {/* Секция: Даты и идентификация */}
-              <DatesIdentificationSection
-                formData={formData}
-                errors={errors}
-                onInputChange={handleInputChange}
-              />
 
               {/* Секция: Участники */}
               <ParticipantManager 
@@ -88,33 +81,12 @@ function ReleaseFormContent() {
                 onUpdateArtist={updateArtist}
               />
 
-              {/* Секция: Дополнительная информация */}
-              <div className="professional-card p-10">
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-foreground">
-                    Дополнительная информация
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Лейбл, заметки и другие дополнительные данные
-                  </p>
-                </div>
-
-                <div className="space-y-6">
-                  <AnimatedInput
-                    label="Название лейбла"
-                    value={formData.label}
-                    onChange={(e) => handleInputChange('label', e.target.value)}
-                    hint="Звукозаписывающий лейбл или саб-лейбл (часто заполняется автоматически)"
-                  />
-
-                <AnimatedInput
-                    label="Заметки"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  hint="Дополнительные комментарии или примечания к релизу"
-                />
-                </div>
-              </div>
+              {/* Секция: Даты и идентификация */}
+              <DatesIdentificationSection
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+              />
             </div>
           )}
 

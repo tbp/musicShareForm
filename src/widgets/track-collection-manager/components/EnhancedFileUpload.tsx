@@ -288,10 +288,10 @@ const EnhancedFileUpload = React.forwardRef<HTMLDivElement, TrackUploadProps>(
         {(error || Object.keys(validationErrors).length > 0) && (
           <div className="space-y-2">
             {error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30 p-3">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                  <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                  <p className="text-sm font-medium text-destructive">
                     {error}
                   </p>
                 </div>
@@ -299,11 +299,11 @@ const EnhancedFileUpload = React.forwardRef<HTMLDivElement, TrackUploadProps>(
             )}
             
             {Object.entries(validationErrors).map(([key, errorMessage]) => (
-              <div key={key} className="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30 p-3">
+              <div key={key} className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                    <p className="text-sm font-medium text-destructive">
                       {key !== 'general' && <span className="font-mono">{key}: </span>}
                       {errorMessage}
                     </p>

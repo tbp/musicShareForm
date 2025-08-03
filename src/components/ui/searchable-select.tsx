@@ -40,46 +40,67 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
     disabled = false,
     className
   }, ref) => {
-    const [isOpen, setIsOpen] = React.useState(false)
-    const [searchQuery, setSearchQuery] = React.useState('')
-    const containerRef = React.useRef<HTMLDivElement>(null)
+      const [isOpen, setIsOpen] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [highlightedIndex, setHighlightedIndex] = React.useState(0)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const searchInputRef = React.useRef<HTMLInputElement>(null)
 
-    // Фильтрация опций по поисковому запросу
-    const filteredOptions = React.useMemo(() => {
-      if (!searchQuery) return options
-      return options.filter(option =>
-        option.label.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }, [options, searchQuery])
+      // Фильтрация опций по поисковому запросу
+  const filteredOptions = React.useMemo(() => {
+    if (!searchQuery) return options
+    return options.filter(option =>
+      option.label.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [options, searchQuery])
+
+  // Сброс выделения при изменении результатов поиска
+  React.useEffect(() => {
+    setHighlightedIndex(0)
+  }, [filteredOptions])
 
     // Выбранная опция
     const selectedOption = options.find(option => option.value === value)
 
     // Закрытие при клике вне
     React.useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-          setIsOpen(false)
-          setSearchQuery('')
-        }
+          const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+        setSearchQuery('')
+        setHighlightedIndex(0)
       }
+    }
 
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    // Обработка выбора опции
-    const handleOptionSelect = (optionValue: string) => {
-      onValueChange?.(optionValue)
-      setIsOpen(false)
-      setSearchQuery('')
-    }
+      // Обработка выбора опции
+  const handleOptionSelect = (optionValue: string) => {
+    onValueChange?.(optionValue)
+    setIsOpen(false)
+    setSearchQuery('')
+    setHighlightedIndex(0)
+  }
 
-    // Очистка выбора
-    const handleClear = (e: React.MouseEvent) => {
-      e.stopPropagation()
-      onValueChange?.('')
-    }
+  // Открытие dropdown с автофокусом на поиск
+  const handleOpen = () => {
+    setIsOpen(true)
+    setHighlightedIndex(0)
+    // Автофокус на поле поиска при открытии
+    setTimeout(() => {
+      searchInputRef.current?.focus()
+    }, 0)
+  }
+
+      // Очистка выбора
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onValueChange?.('')
+    setSearchQuery('')
+    setHighlightedIndex(0)
+  }
 
     return (
       <div ref={ref} className={cn('relative', className)}>
@@ -97,9 +118,9 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
         <div ref={containerRef} className="relative">
           {/* Триггер */}
           <div
-            onClick={() => !disabled && setIsOpen(!isOpen)}
+            onClick={() => !disabled && (isOpen ? setIsOpen(false) : handleOpen())}
             className={cn(
-              'relative w-full h-10 cursor-pointer rounded-lg border border-input bg-background px-3 py-2 text-left shadow-sm transition-all flex items-center',
+              'relative w-full h-14 cursor-pointer rounded-lg border border-input bg-background px-3 py-3 text-left shadow-sm transition-all flex items-center',
               'focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary',
               'hover:border-primary/50',
               'disabled:cursor-not-allowed disabled:opacity-50',
@@ -112,7 +133,11 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
               if (disabled) return
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                setIsOpen(!isOpen)
+                if (isOpen) {
+                  setIsOpen(false)
+                } else {
+                  handleOpen()
+                }
               }
             }}
           >
@@ -151,10 +176,32 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
               <div className="relative p-3 border-b border-border">
                 <Search className="absolute left-6 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault()
+                      setHighlightedIndex(prev => 
+                        prev < filteredOptions.length - 1 ? prev + 1 : 0
+                      )
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault()
+                      setHighlightedIndex(prev => 
+                        prev > 0 ? prev - 1 : filteredOptions.length - 1
+                      )
+                    } else if (e.key === 'Enter' && filteredOptions.length > 0) {
+                      e.preventDefault()
+                      handleOptionSelect(filteredOptions[highlightedIndex].value)
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault()
+                      setIsOpen(false)
+                      setSearchQuery('')
+                      setHighlightedIndex(0)
+                    }
+                  }}
                   className="w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary"
                 />
               </div>
@@ -166,18 +213,20 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
                     {emptyMessage}
                   </div>
                 ) : (
-                  filteredOptions.map((option) => (
+                  filteredOptions.map((option, index) => (
                     <button
                       key={option.value}
                       type="button"
                       onClick={() => handleOptionSelect(option.value)}
+                      onMouseEnter={() => setHighlightedIndex(index)}
                       disabled={option.disabled}
                       className={cn(
                         'relative w-full cursor-pointer select-none py-2 px-3 text-left text-sm transition-colors',
                         'hover:bg-accent hover:text-accent-foreground',
                         'focus:bg-accent focus:text-accent-foreground focus:outline-none',
                         'disabled:cursor-not-allowed disabled:opacity-50',
-                        option.value === value && 'bg-accent text-accent-foreground'
+                        option.value === value && 'bg-accent text-accent-foreground',
+                        index === highlightedIndex && 'bg-primary/10 text-primary'
                       )}
                     >
                       <div className="flex items-center justify-between">

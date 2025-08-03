@@ -14,24 +14,24 @@ body {
 
 :root {
   --radius: 0.625rem;
-  --background: 0 0% 100%;
+  --background: 20 8% 97.5%;
   --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
+  --card: 20 6% 98.5%;
   --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
+  --popover: 20 6% 98.5%;
   --popover-foreground: 0 0% 3.9%;
   --primary: 0 0% 9%;
   --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
+  --secondary: 20 5% 93%;
   --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
+  --muted: 20 5% 93%;
+  --muted-foreground: 0 0% 38%;
+  --accent: 20 5% 93%;
   --accent-foreground: 0 0% 9%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
+  --border: 20 3% 84%;
+  --input: 20 3% 84%;
   --ring: 0 0% 3.9%;
   --chart-1: 0 0% 40%;
   --chart-2: 0 0% 50%;
@@ -221,8 +221,8 @@ body {
 
   .radio-card[data-selected="true"] {
     border-color: hsl(var(--primary));
-    background-color: hsl(var(--primary) / 0.04);
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.1);
+    background-color: hsl(var(--primary) / 0.06);
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.15);
   }
 
   /* Selection indicator */

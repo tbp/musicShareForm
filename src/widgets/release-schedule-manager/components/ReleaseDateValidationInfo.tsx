@@ -32,22 +32,22 @@ export function ReleaseDateValidationInfo({
     <div className={cn(
       "border rounded-lg p-4",
       isCritical 
-        ? "bg-red-50/50 border-red-200 dark:bg-red-950/20 dark:border-red-800" 
+        ? "bg-destructive/5 border-destructive/20" 
         : isWarning 
-        ? "bg-amber-50/50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800"
+        ? "bg-warning/5 border-warning/20"
         : isNotice
-        ? "bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800"
-        : "bg-green-50/50 border-green-200 dark:bg-green-950/20 dark:border-green-800"
+        ? "bg-info/5 border-info/20"
+        : "bg-success/5 border-success/20"
     )}>
       <div className="flex items-start gap-3">
         {isCritical ? (
-          <AlertTriangleIcon className="h-5 w-5 text-red-600 dark:text-red-500 mt-0.5 flex-shrink-0" />
+          <AlertTriangleIcon className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
         ) : isWarning ? (
-          <ClockIcon className="h-5 w-5 text-amber-600 dark:text-amber-500 mt-0.5 flex-shrink-0" />
+          <ClockIcon className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
         ) : isNotice ? (
-          <CalendarIcon className="h-5 w-5 text-blue-600 dark:text-blue-500 mt-0.5 flex-shrink-0" />
+          <CalendarIcon className="h-5 w-5 text-info mt-0.5 flex-shrink-0" />
         ) : (
-          <CheckCircle2Icon className="h-5 w-5 text-green-600 dark:text-green-500 mt-0.5 flex-shrink-0" />
+          <CheckCircle2Icon className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
         )}
         
         <div className="space-y-2">

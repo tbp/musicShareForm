@@ -167,8 +167,9 @@ const CoverArtUploader = React.forwardRef<HTMLDivElement, CoverArtUploaderProps>
               ? 'border-destructive' 
               : 'border-border hover:border-primary/50',
             'cursor-pointer overflow-hidden',
-            // Убираем aspect-square, делаем flex колонку с min-height
-            currentFile ? 'aspect-square' : 'min-h-[500px] flex flex-col'
+            // Всегда делаем квадратным
+            'aspect-square',
+            !currentFile && 'flex flex-col'
           )}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
@@ -232,18 +233,25 @@ const CoverArtUploader = React.forwardRef<HTMLDivElement, CoverArtUploaderProps>
                 </h3>
                 
                 <p className="text-sm text-muted-foreground mb-4">
-                  Перетащите изображение сюда или нажмите для выбора
+                  Перетащите изображение сюда или нажмите
                 </p>
                 
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                <div className="inline-flex items-center gap-2 px-4 py-2 border border-border text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
                   <Upload className="w-4 h-4" />
                   Выбрать файл
                 </div>
                 
                 <p className="text-xs text-muted-foreground mt-4">
-                  JPG, PNG • Высокое качество
+                  JPG, PNG • до 30МБ • разрешение 3000×3000px
                 </p>
               </div>
+
+        {/* Footer с предупреждением */}
+        <div className="mt-3 py-6 border-t border-dashed">
+          <p className="text-xs text-muted-foreground text-center">
+            Загружая обложку, вы подтверждаете наличие у вас прав на коммерческое использование
+          </p>
+        </div>
             </>
           )}
 
@@ -257,22 +265,16 @@ const CoverArtUploader = React.forwardRef<HTMLDivElement, CoverArtUploaderProps>
           />
         </div>
 
-        {/* Предупреждение - всегда показываем под обложкой */}
-        <div className="mt-4 p-4 border border-border bg-muted/20 rounded-lg">
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Загружая обложку, вы подтверждаете наличие у вас прав на коммерческое использование. Многие AI-сервисы при генерации не передают такие права.
-          </p>
-        </div>
 
         {/* Ошибка */}
         {(error || validationError) && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30 p-4">
+          <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 mt-0.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-destructive/10 text-destructive mt-0.5">
                 <AlertCircle className="h-4 w-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                <p className="text-sm font-medium text-destructive">
                   {error || validationError}
                 </p>
               </div>

@@ -66,7 +66,7 @@ const ParticipantNameCell = React.memo(function ParticipantNameCell({
         onChange={handleUpdate}
         onEditParticipant={onEdit ? handleEdit : undefined}
         showValidationError={true}
-        className="h-10"
+        className="h-14"
       />
     </div>
   )

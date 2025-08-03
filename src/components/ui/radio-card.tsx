@@ -40,7 +40,7 @@ const RadioCard = React.forwardRef<HTMLDivElement, RadioCardProps>(
       >
         <div className="flex items-center gap-3 w-full">
           {icon && (
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted/60 flex-shrink-0">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/8 text-primary flex-shrink-0">
               {icon}
             </div>
           )}

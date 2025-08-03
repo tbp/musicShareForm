@@ -79,7 +79,7 @@ export function DatesIdentificationSection({
   today.setHours(0, 0, 0, 0)
 
   return (
-    <div className="professional-card p-8">
+    <div>
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <h2 className="text-xl font-semibold text-foreground">

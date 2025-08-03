@@ -1,7 +1,7 @@
 import { AnimatedInput } from '@/components/ui/animated-input'
 import { ArtworkManager } from '@/widgets/artwork-manager'
 import { SearchableSelect } from '@/components/ui/searchable-select'
-import { RadioGroupWithHints } from '@/components/ui/radio-group-with-hints'
+import { ParentalAdvisorySelect } from '@/components/ui/parental-advisory-select'
 import { YearCombobox } from '@/components/ui/year-combobox'
 import type { FileItem } from '@/widgets/artwork-manager'
 import { ReleaseFormData } from '@/types/ddex-release'
@@ -24,14 +24,14 @@ export function BasicInfoSection({
   onCoverArtChange
 }: BasicInfoSectionProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <div className="grid grid-cols-1 lg:grid-cols-[38%_1fr] gap-8">
       {/* Левая колонка - Обложка */}
       <div className="space-y-6">
         <ArtworkManager
           value={coverArt}
           onFilesChange={onCoverArtChange}
           error={errors.coverArt}
-          maxSizeMB={10}
+          maxSizeMB={30}
         />
       </div>
 
@@ -87,11 +87,12 @@ export function BasicInfoSection({
           />
         </div>
 
-        <RadioGroupWithHints
+        <ParentalAdvisorySelect
           label="Ненормативная лексика"
           options={PARENTAL_ADVISORY_OPTIONS}
           value={formData.parentalAdvisory}
           onValueChange={(value) => onInputChange('parentalAdvisory', value)}
+          placeholder="Выберите тип контента"
         />
       </div>
     </div>
