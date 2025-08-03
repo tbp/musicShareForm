@@ -42,5 +42,6 @@ export function useMediaQuery(query: string): boolean {
     }
   }, [query, isClient])
 
-  return matches
+  // SSR-safe: на сервере всегда false для предотвращения hydration mismatch
+  return isClient ? matches : false
 }

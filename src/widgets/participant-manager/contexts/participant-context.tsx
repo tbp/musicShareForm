@@ -69,25 +69,25 @@ function participantReducer(state: ParticipantState, action: ParticipantAction):
   }
 }
 
-// Context interface
-interface ParticipantContextType {
-  state: ParticipantState
-  dispatch: React.Dispatch<ParticipantAction>
-  // Helper functions (equivalent to Zustand selectors)
+// Context interface разделяем на данные и действия
+interface ParticipantDataContextType {
   participants: ArtistCredit[]
+  participantsCount: number
+  mainArtists: ArtistCredit[]
+}
+
+interface ParticipantActionsContextType {
   setParticipants: (participants: ArtistCredit[]) => void
   updateParticipant: (index: number, participant: ArtistCredit) => void
   addParticipant: (participant: ArtistCredit) => void
   removeParticipant: (index: number) => void
   moveParticipant: (fromIndex: number, toIndex: number) => void
   resetParticipants: () => void
-  // Computed values
-  participantsCount: number
-  mainArtists: ArtistCredit[]
 }
 
-// Create context
-const ParticipantContext = createContext<ParticipantContextType | undefined>(undefined)
+// Create separate contexts to minimize re-renders
+const ParticipantDataContext = createContext<ParticipantDataContextType | undefined>(undefined)
+const ParticipantActionsContext = createContext<ParticipantActionsContextType | undefined>(undefined)
 
 // LocalStorage key
 const STORAGE_KEY = 'participant-store'
@@ -129,107 +129,129 @@ export function ParticipantProvider({ children }: ParticipantProviderProps) {
     }
   }, [state])
 
-  // Helper functions
-  const setParticipants = (participants: ArtistCredit[]) => {
+  // Helper functions - мемоизируем для предотвращения перерендеров
+  const setParticipants = React.useCallback((participants: ArtistCredit[]) => {
     dispatch({ type: 'SET_PARTICIPANTS', payload: participants })
-  }
+  }, [])
 
-  const updateParticipant = (index: number, participant: ArtistCredit) => {
+  const updateParticipant = React.useCallback((index: number, participant: ArtistCredit) => {
     dispatch({ type: 'UPDATE_PARTICIPANT', payload: { index, participant } })
-  }
+  }, [])
 
-  const addParticipant = (participant: ArtistCredit) => {
+  const addParticipant = React.useCallback((participant: ArtistCredit) => {
     dispatch({ type: 'ADD_PARTICIPANT', payload: participant })
-  }
+  }, [])
 
-  const removeParticipant = (index: number) => {
+  const removeParticipant = React.useCallback((index: number) => {
     dispatch({ type: 'REMOVE_PARTICIPANT', payload: index })
-  }
+  }, [])
 
-  const moveParticipant = (fromIndex: number, toIndex: number) => {
+  const moveParticipant = React.useCallback((fromIndex: number, toIndex: number) => {
     dispatch({ type: 'MOVE_PARTICIPANT', payload: { fromIndex, toIndex } })
-  }
+  }, [])
 
-  const resetParticipants = () => {
+  const resetParticipants = React.useCallback(() => {
     dispatch({ type: 'RESET_PARTICIPANTS' })
-  }
+  }, [])
 
-  // Computed values
-  const participantsCount = state.participants.length
-  const mainArtists = state.participants.filter((p: ArtistCredit) => p.role === 'MainArtist')
+  // Computed values - мемоизируем для предотвращения перерендеров
+  const participantsCount = React.useMemo(() => state.participants.length, [state.participants.length])
+  const mainArtists = React.useMemo(() => 
+    state.participants.filter((p: ArtistCredit) => p.role === 'MainArtist'), 
+    [state.participants]
+  )
 
-  const contextValue: ParticipantContextType = {
-    state,
-    dispatch,
+  // Мемоизируем данные и действия отдельно
+  const dataValue: ParticipantDataContextType = React.useMemo(() => ({
     participants: state.participants,
+    participantsCount,
+    mainArtists
+  }), [state.participants, participantsCount, mainArtists])
+
+  const actionsValue: ParticipantActionsContextType = React.useMemo(() => ({
     setParticipants,
     updateParticipant,
     addParticipant,
     removeParticipant,
     moveParticipant,
-    resetParticipants,
-    participantsCount,
-    mainArtists
-  }
+    resetParticipants
+  }), [setParticipants, updateParticipant, addParticipant, removeParticipant, moveParticipant, resetParticipants])
 
   return (
-    <ParticipantContext.Provider value={contextValue}>
-      {children}
-    </ParticipantContext.Provider>
+    <ParticipantDataContext.Provider value={dataValue}>
+      <ParticipantActionsContext.Provider value={actionsValue}>
+        {children}
+      </ParticipantActionsContext.Provider>
+    </ParticipantDataContext.Provider>
   )
 }
 
-// Hook to use the context
-export function useParticipantContext() {
-  const context = useContext(ParticipantContext)
+// Hooks for data (минимальные перерендеры)
+function useParticipantData() {
+  const context = useContext(ParticipantDataContext)
   if (context === undefined) {
-    throw new Error('useParticipantContext must be used within a ParticipantProvider')
+    throw new Error('useParticipantData must be used within a ParticipantProvider')
   }
   return context
 }
 
-// Individual selector hooks (for easier migration)
+function useParticipantActions() {
+  const context = useContext(ParticipantActionsContext)
+  if (context === undefined) {
+    throw new Error('useParticipantActions must be used within a ParticipantProvider')
+  }
+  return context
+}
+
+// Individual selector hooks - теперь используют разделенные контексты
 export const useParticipants = () => {
-  const { participants } = useParticipantContext()
+  const { participants } = useParticipantData()
   return participants
 }
 
 export const useParticipantsCount = () => {
-  const { participantsCount } = useParticipantContext()
+  const { participantsCount } = useParticipantData()
   return participantsCount
 }
 
 export const useMainArtists = () => {
-  const { mainArtists } = useParticipantContext()
+  const { mainArtists } = useParticipantData()
   return mainArtists
 }
 
 export const useSetParticipants = () => {
-  const { setParticipants } = useParticipantContext()
+  const { setParticipants } = useParticipantActions()
   return setParticipants
 }
 
 export const useUpdateParticipant = () => {
-  const { updateParticipant } = useParticipantContext()
+  const { updateParticipant } = useParticipantActions()
   return updateParticipant
 }
 
 export const useAddParticipant = () => {
-  const { addParticipant } = useParticipantContext()
+  const { addParticipant } = useParticipantActions()
   return addParticipant
 }
 
 export const useRemoveParticipant = () => {
-  const { removeParticipant } = useParticipantContext()
+  const { removeParticipant } = useParticipantActions()
   return removeParticipant
 }
 
 export const useMoveParticipant = () => {
-  const { moveParticipant } = useParticipantContext()
+  const { moveParticipant } = useParticipantActions()
   return moveParticipant
 }
 
 export const useResetParticipants = () => {
-  const { resetParticipants } = useParticipantContext()
+  const { resetParticipants } = useParticipantActions()
   return resetParticipants
+}
+
+// Backward compatibility hook
+export const useParticipantContext = () => {
+  const data = useParticipantData()
+  const actions = useParticipantActions()
+  return { ...data, ...actions }
 }
