@@ -1,9 +1,13 @@
 // Participant Manager Widget
 // Управление участниками релиза
 
-export { ParticipantsSection as ParticipantManager } from './components/ParticipantsSection'
+export { ParticipantsSectionResponsive as ParticipantManager } from './components/ParticipantsSectionResponsive'
+export { ParticipantsSectionMobile } from './components/ParticipantsSectionMobile'
+export { ParticipantsSectionResponsive } from './components/ParticipantsSectionResponsive'
 export { ParticipantAutocomplete } from './components/ParticipantAutocomplete'
 export { CreateParticipantModal } from './components/CreateParticipantModal'
+export { CreateParticipantModalMobile } from './components/CreateParticipantModalMobile'
+export { CreateParticipantModalResponsive } from './components/CreateParticipantModalResponsive'
 export { ArtistPlatformsPopover } from './components/ArtistPlatformsPopover'
 export { ParticipantsDataTable as ParticipantsTable } from './components/ParticipantsTable/data-table'
 export { createColumns } from './components/ParticipantsTable/columns'

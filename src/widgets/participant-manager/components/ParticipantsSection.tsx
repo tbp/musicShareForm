@@ -7,14 +7,13 @@ import { X, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
 
 import type { 
   ArtistCredit, 
   ParticipantRow, 
   ParticipantsSectionProps 
 } from '../types/participant.types'
-import { CreateParticipantModal } from './CreateParticipantModal'
+import { CreateParticipantModalResponsive } from './CreateParticipantModalResponsive'
 import { createColumns } from './ParticipantsTable/columns'
 import { 
   useParticipants, 
@@ -107,7 +106,7 @@ const ParticipantsPreview = React.memo(function ParticipantsPreview({
     <div className="mt-6">
       {/* Легкий превью отображения */}
       <div className="text-xs text-muted-foreground/60 leading-relaxed">
-        <span className="text-muted-foreground/70">Отображение на площадках:</span> {formatArtistDisplay()}
+        <span className="text-muted-foreground/70">Отображение участников на стриминговых платформах:</span> {formatArtistDisplay()}
       </div>
         
       {shouldShowVariousArtistsToggle && (
@@ -274,7 +273,7 @@ export function ParticipantsSection({
       <div className="space-y-1">
         <h2 className="text-xl font-semibold text-foreground">Участники</h2>
         <p className="text-sm text-muted-foreground max-w-2xl">
-          Укажите всех участников релиза и их роли. Доли в правах можно не заполнять, если не планируете точное распределение доходов.
+          Укажите всех участников релиза и их роли
         </p>
       </div>
 
@@ -316,7 +315,7 @@ export function ParticipantsSection({
 
       {/* Модальное окно редактирования участника */}
       {editingParticipant && (
-        <CreateParticipantModal
+        <CreateParticipantModalResponsive
           isOpen={!!editingParticipant}
           onClose={() => setEditingParticipant(null)}
           onCreateParticipant={handleSaveParticipant}

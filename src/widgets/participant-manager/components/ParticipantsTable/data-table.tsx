@@ -324,7 +324,7 @@ export function ParticipantsDataTable<TData extends { id: string }, TValue>({
                 <TableCell colSpan={columns.length} className="h-14 px-4 py-2">
                   <button 
                     onClick={onAddParticipant}
-                    className="w-full h-10 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+                    className="w-full h-10 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 rounded-md group"
                   >
                     <Plus className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
                     <span className="text-sm">Добавить участника</span>
