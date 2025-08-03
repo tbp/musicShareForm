@@ -4,7 +4,6 @@ import { IconProps, iconSizes } from './types'
 export function YandexMusicIcon({ 
   size = 'md', 
   className, 
-  title = "Яндекс Музыка", 
   'aria-label': ariaLabel = "Яндекс Музыка" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 

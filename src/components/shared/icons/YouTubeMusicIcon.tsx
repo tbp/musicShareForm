@@ -4,7 +4,6 @@ import { IconProps, iconSizes } from './types'
 export function YouTubeMusicIcon({ 
   size = 'md', 
   className, 
-  title = "YouTube Music", 
   'aria-label': ariaLabel = "YouTube Music" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 

@@ -33,7 +33,6 @@ export function EnhancedDatePicker({
   value,
   onChange,
   label,
-  placeholder,
   error,
   minDate,
   showPresets = false,

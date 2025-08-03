@@ -14,7 +14,6 @@ export function ShareButton({ className }: ShareButtonProps) {
   const [activeTab, setActiveTab] = useState<'share' | 'publish'>('share')
   const [copied, setCopied] = useState(false)
   const [shareEmail, setShareEmail] = useState('')
-  const [access, setAccess] = useState<'view' | 'edit'>('view')
   const [privacy, setPrivacy] = useState<'private' | 'anyone'>('private')
   const [releaseUrl, setReleaseUrl] = useState('')
 
@@ -139,7 +138,7 @@ export function ShareButton({ className }: ShareButtonProps) {
                     className="px-3 py-1 text-sm border border-border rounded hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-1"
                   >
                     <Link className="w-3 h-3" />
-                    Копировать ссылку
+                    {copied ? 'Скопировано' : 'Копировать ссылку'}
                   </button>
                 </div>
               </div>

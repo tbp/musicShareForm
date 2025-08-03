@@ -4,7 +4,6 @@ import { IconProps, iconSizes } from './types'
 export function ZvookIcon({ 
   size = 'md', 
   className, 
-  title = "Звук", 
   'aria-label': ariaLabel = "Звук" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 
