@@ -15,14 +15,14 @@ import type {
 } from '../types/participant.types'
 import { CreateParticipantModalResponsive } from './CreateParticipantModalResponsive'
 import { createColumns } from './ParticipantsTable/columns'
-import { 
-  useParticipants, 
+import {
+  useParticipants,
   useSetParticipants,
   useUpdateParticipant,
   useAddParticipant,
   useRemoveParticipant,
   useMoveParticipant
-} from '../stores/participant-store'
+} from '../contexts/participant-context'
 
 // Обертка для таблицы участников без SSR
 const ParticipantsTableWrapper = dynamic(
@@ -230,14 +230,14 @@ export function ParticipantsSection({
   // Обработчик сохранения изменений участника
   const handleSaveParticipant = React.useCallback((updatedParticipant: any) => {
     if (editingParticipant) {
-      // Сначала обновляем участника через Zustand
-      Object.keys(updatedParticipant).forEach(key => {
-        updateParticipant(editingParticipant.index, key, updatedParticipant[key])
-      })
+      // Получаем текущего участника и обновляем его
+      const currentParticipant = participants[editingParticipant.index]
+      const mergedParticipant = { ...currentParticipant, ...updatedParticipant }
+      updateParticipant(editingParticipant.index, mergedParticipant)
     }
     // Затем закрываем модальное окно
     setEditingParticipant(null)
-  }, [editingParticipant, updateParticipant])
+  }, [editingParticipant, updateParticipant, participants])
 
   // Преобразуем participants в ParticipantRow, используя стабильные ID из данных
   const participantsData: ParticipantRow[] = React.useMemo(() => 
@@ -246,12 +246,21 @@ export function ParticipantsSection({
       id: artist.id || `legacy-participant-${index}` // Fallback для старых данных
     })), [participants])
 
-  // Создаем колонки с передачей колбеков из Zustand (мемоизируем для предотвращения перерендеров)
+  // Адаптер для преобразования signature updateParticipant
+  const handleUpdateParticipantField = React.useCallback((index: number, field: string, value: unknown) => {
+    const currentParticipant = participants[index]
+    if (currentParticipant) {
+      const updatedParticipant = { ...currentParticipant, [field]: value }
+      updateParticipant(index, updatedParticipant)
+    }
+  }, [participants, updateParticipant])
+
+  // Создаем колонки с передачей колбеков из Context (мемоизируем для предотвращения перерендеров)
   const columns = React.useMemo(() => createColumns({
-    onUpdate: updateParticipant,
+    onUpdate: handleUpdateParticipantField,
     onRemove: handleRemoveArtist,
     onEdit: handleEditParticipant
-  }), [updateParticipant, handleRemoveArtist, handleEditParticipant])
+  }), [handleUpdateParticipantField, handleRemoveArtist, handleEditParticipant])
 
   // Формируем данные для различных компонентов
   const formData = React.useMemo(() => ({

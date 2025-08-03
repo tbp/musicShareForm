@@ -45,14 +45,14 @@ import type {
 } from '../types/participant.types'
 import { CreateParticipantModalResponsive } from './CreateParticipantModalResponsive'
 import { ParticipantAutocomplete } from './ParticipantAutocomplete'
-import { 
-  useParticipants, 
+import {
+  useParticipants,
   useSetParticipants,
   useUpdateParticipant,
   useAddParticipant,
   useRemoveParticipant,
   useMoveParticipant
-} from '../stores/participant-store'
+} from '../contexts/participant-context'
 
 // Sortable карточка участника
 interface SortableParticipantCardProps {
@@ -386,12 +386,22 @@ export function ParticipantsSectionMobile({
 
   const handleSaveParticipant = React.useCallback((updatedParticipant: any) => {
     if (editingParticipant) {
-      Object.keys(updatedParticipant).forEach(key => {
-        updateParticipant(editingParticipant.index, key, updatedParticipant[key])
-      })
+      // Получаем текущего участника и обновляем его
+      const currentParticipant = participants[editingParticipant.index]
+      const mergedParticipant = { ...currentParticipant, ...updatedParticipant }
+      updateParticipant(editingParticipant.index, mergedParticipant)
     }
     setEditingParticipant(null)
-  }, [editingParticipant, updateParticipant])
+  }, [editingParticipant, updateParticipant, participants])
+
+  // Адаптер для преобразования signature updateParticipant
+  const handleUpdateParticipantField = React.useCallback((index: number, field: string, value: unknown) => {
+    const currentParticipant = participants[index]
+    if (currentParticipant) {
+      const updatedParticipant = { ...currentParticipant, [field]: value }
+      updateParticipant(index, updatedParticipant)
+    }
+  }, [participants, updateParticipant])
 
   const handleLocalInputChange = React.useCallback((field: string, value: any) => {
     if (field === 'variousArtists') {
@@ -463,7 +473,7 @@ export function ParticipantsSectionMobile({
                   key={participant.id || `participant-${index}`}
                   participant={participant}
                   index={index}
-                  onUpdate={updateParticipant}
+                  onUpdate={handleUpdateParticipantField}
                   onRemove={handleRemoveArtist}
                   onEdit={handleEditParticipant}
                   isLastMainArtist={isLastMainArtist}

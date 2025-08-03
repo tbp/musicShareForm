@@ -13,7 +13,7 @@ import EnhancedReleaseFormNavigation from '@/components/release-form/enhanced-re
 import { BasicInfoSection } from '@/components/release-form/sections/basic-info-section'
 import { ReleaseTypeSection } from '@/components/release-form/sections/release-type-section'
 import { DatesIdentificationSection } from '@/components/release-form/sections/dates-identification-section'
-import { ParticipantManager } from '@/widgets/participant-manager'
+import { ParticipantManager, ParticipantProvider } from '@/widgets/participant-manager'
 import { Footer } from '@/components/ui/footer'
 
 function ReleaseFormContent() {
@@ -151,7 +151,9 @@ function ReleaseFormContent() {
 export function ReleaseFormScreen() {
   return (
     <ReleaseFormProvider>
-      <ReleaseFormContent />
+      <ParticipantProvider>
+        <ReleaseFormContent />
+      </ParticipantProvider>
     </ReleaseFormProvider>
   )
 } 

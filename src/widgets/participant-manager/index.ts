@@ -21,9 +21,10 @@ export type * from './types/participant.types'
 export { PARTICIPANT_ROLES } from './constants/participantRoles'
 export { DEMO_PARTICIPANTS, searchParticipantsBasic } from './data/demoParticipants'
 
-// Zustand стор
-export { 
-  useParticipantStore, 
+// React Context для управления участниками
+export {
+  ParticipantProvider,
+  useParticipantContext,
   useParticipants,
   useParticipantsCount,
   useMainArtists,
@@ -33,4 +34,4 @@ export {
   useRemoveParticipant,
   useMoveParticipant,
   useResetParticipants
-} from './stores/participant-store'
+} from './contexts/participant-context'
