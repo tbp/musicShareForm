@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { ReleaseFormData, ArtistCredit, Release } from '@/types/ddex-release'
+import { ReleaseFormData, Release } from '@/types/ddex-release'
 import type { TrackFileItem } from '@/widgets/track-collection-manager'
 import type { FileItem } from '@/widgets/artwork-manager'
 

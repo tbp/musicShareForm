@@ -4,7 +4,6 @@ import { IconProps, iconSizes } from './types'
 export function BandLinkIcon({ 
   size = 'md', 
   className, 
-  title = "BandLink", 
   'aria-label': ariaLabel = "BandLink" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 

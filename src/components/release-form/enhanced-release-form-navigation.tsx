@@ -1,11 +1,6 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { Save, Info, Music, Settings, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useReleaseFormContext } from '@/contexts/release-form-context'
 import { cn } from '@/lib/utils'

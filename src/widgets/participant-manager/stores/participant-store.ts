@@ -53,8 +53,8 @@ export const useParticipantStore = create<ParticipantState>()(
             if (fromIndex === toIndex) return state
 
             const newParticipants = [...state.participants]
-            const [removed] = newParticipants.splice(fromIndex, 1)
-            newParticipants.splice(toIndex, 0, removed)
+            const [item] = newParticipants.splice(fromIndex, 1)
+            newParticipants.splice(toIndex, 0, item)
             
             return { participants: newParticipants }
           }, false, 'moveParticipant'),
@@ -65,7 +65,7 @@ export const useParticipantStore = create<ParticipantState>()(
       {
         name: 'participant-store',
         version: 1,
-        migrate: (persistedState: any, version: number) => {
+        migrate: (persistedState: any) => {
           // Простая миграция - возвращаем состояние как есть
           // В будущем здесь можно добавить логику преобразования для новых версий
           return persistedState

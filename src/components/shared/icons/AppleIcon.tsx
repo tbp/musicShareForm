@@ -4,7 +4,6 @@ import { IconProps, iconSizes } from './types'
 export function AppleIcon({ 
   size = 'md', 
   className, 
-  title = "Apple Music", 
   'aria-label': ariaLabel = "Apple Music" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 

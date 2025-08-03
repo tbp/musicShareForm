@@ -1,13 +1,11 @@
 'use client'
 
 import React from 'react'
-import { GripVertical, HelpCircle, Trash2 } from 'lucide-react'
+import { GripVertical, Trash2 } from 'lucide-react'
 import { ColumnDef } from '@tanstack/react-table'
 import { PARTICIPANT_ROLES } from '../../constants/participantRoles'
 import { SearchableSelect } from '@/components/ui/searchable-select'
-import { NumberInput } from '@/components/ui/number-input'
 import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import type { ParticipantRow } from '../../types/participant.types'
 import { ParticipantAutocomplete } from '../ParticipantAutocomplete'

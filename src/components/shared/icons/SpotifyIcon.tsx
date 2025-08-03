@@ -4,7 +4,7 @@ import { IconProps, iconSizes } from './types'
 export function SpotifyIcon({ 
   size = 'md', 
   className, 
-  title = "Spotify", 
+ 
   'aria-label': ariaLabel = "Spotify" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 

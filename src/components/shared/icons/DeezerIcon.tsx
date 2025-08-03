@@ -4,7 +4,7 @@ import { IconProps, iconSizes } from './types'
 export function DeezerIcon({ 
   size = 'md', 
   className, 
-  title = "Deezer", 
+ 
   'aria-label': ariaLabel = "Deezer" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 

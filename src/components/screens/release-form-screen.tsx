@@ -3,7 +3,7 @@
 import { useCallback } from 'react'
 import { Settings } from 'lucide-react'
 import { ReleaseValidationDashboard } from '@/widgets/release-validation-dashboard'
-import { AnimatedInput } from '@/components/ui/animated-input'
+
 
 import { TrackCollectionManager } from '@/widgets/track-collection-manager'
 

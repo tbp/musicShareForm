@@ -4,7 +4,7 @@ import { IconProps, iconSizes } from './types'
 export function VKIcon({ 
   size = 'md', 
   className, 
-  title = "VK Музыка", 
+ 
   'aria-label': ariaLabel = "VK Музыка" 
 }: IconProps) {
   const sizeClass = typeof size === 'number' 
