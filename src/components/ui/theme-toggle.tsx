@@ -4,34 +4,21 @@ import { useEffect, useState } from 'react'
 import { Sun, Moon } from 'lucide-react'
 
 export function ThemeToggle() {
+  // Предотвращаем hydration mismatch - одинаковое состояние на сервере и клиенте
   const [isDark, setIsDark] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Проверяем сохраненную тему или используем системные настройки по умолчанию
-    const saved = localStorage.getItem('theme')
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    
-    let shouldBeDark: boolean
-    if (saved === 'dark') {
-      shouldBeDark = true
-    } else if (saved === 'light') {
-      shouldBeDark = false
-    } else {
-      // Если тема не сохранена, используем системную
-      shouldBeDark = systemDark
-    }
-    
-    setIsDark(shouldBeDark)
-    if (shouldBeDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    // После монтирования синхронизируем с реальной темой
+    setMounted(true)
+    const currentTheme = document.documentElement.classList.contains('dark')
+    setIsDark(currentTheme)
 
     // Отслеживаем изменения системной темы
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem('theme')) {
+      const savedTheme = localStorage.getItem('theme')
+      if (!savedTheme) {
         // Если пользователь не выбрал тему вручную, следуем системной
         setIsDark(e.matches)
         if (e.matches) {
@@ -57,6 +44,19 @@ export function ThemeToggle() {
       document.documentElement.classList.remove('dark')
       localStorage.setItem('theme', 'light')
     }
+  }
+
+  // До монтирования показываем статичную иконку (предотвращение hydration mismatch)
+  if (!mounted) {
+    return (
+      <button
+        onClick={toggleTheme}
+        className="p-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+        aria-label="Переключить тему"
+      >
+        <Moon className="h-4 w-4" />
+      </button>
+    )
   }
 
   return (

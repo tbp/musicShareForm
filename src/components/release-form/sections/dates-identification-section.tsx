@@ -79,7 +79,7 @@ export function DatesIdentificationSection({
   today.setHours(0, 0, 0, 0)
 
   return (
-    <div>
+    <div className='professional-card p-10'>
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <h2 className="text-xl font-semibold text-foreground">
@@ -110,7 +110,6 @@ export function DatesIdentificationSection({
             error={errors.releaseDate}
             minDate={today}
             showPresets={true}
-            required={true}
           />
 
           {/* Иконка связи с popover подсказкой */}

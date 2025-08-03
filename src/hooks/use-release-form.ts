@@ -4,7 +4,6 @@ import type { TrackFileItem } from '@/widgets/track-collection-manager'
 import type { FileItem } from '@/widgets/artwork-manager'
 
 export function useReleaseForm() {
-  const [activeTab, setActiveTab] = useState('basic')
   const [validationOpen, setValidationOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -113,24 +112,19 @@ export function useReleaseForm() {
       newErrors.artists = 'Все исполнители должны иметь отображаемое имя'
     }
 
-    if (coverArt.length === 0) {
-      newErrors.coverArt = 'Обложка обязательна для релиза'
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [formData.title, formData.artists, coverArt.length])
+  }, [formData.title, formData.artists])
 
   const getValidationProgress = useCallback(() => {
     const requiredFields = [
       formData.title,
-      formData.artists[0]?.displayName,
-      coverArt.length > 0 ? 'cover' : ''
+      formData.artists[0]?.displayName
     ]
     
     const filledFields = requiredFields.filter(field => field).length
     return Math.round((filledFields / requiredFields.length) * 100)
-  }, [formData.title, formData.artists, coverArt.length])
+  }, [formData.title, formData.artists])
 
   // Проверяем, есть ли изменения в форме (оптимизированная версия)
   const hasFormChanges = useCallback(() => {
@@ -202,8 +196,6 @@ export function useReleaseForm() {
 
   return {
     // Состояние
-    activeTab,
-    setActiveTab,
     validationOpen,
     setValidationOpen,
     isSubmitting,

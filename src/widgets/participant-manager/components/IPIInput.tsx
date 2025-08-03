@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { AnimatedInput } from '@/components/ui/animated-input'
 
 interface IPIInputProps {
@@ -55,6 +55,7 @@ export function IPIInput({
   className
 }: IPIInputProps) {
   const [isTouched, setIsTouched] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
@@ -87,6 +88,7 @@ export function IPIInput({
   return (
     <div className="relative">
       <AnimatedInput
+        ref={inputRef}
         id={id}
         label={label}
         value={value}

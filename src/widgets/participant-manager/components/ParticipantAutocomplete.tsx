@@ -15,7 +15,7 @@ import type {
 } from '../types/participant.types'
 import { searchParticipants } from '../utils/participantUtils'
 import { ArtistPlatformsPopover } from './ArtistPlatformsPopover'
-import { CreateParticipantModalResponsive } from './CreateParticipantModalResponsive'
+import { CreateParticipantModal } from './CreateParticipantModal'
 
 // Компонент для иконки платформы
 function PlatformIcon({ platform, size = "md", className = "", title, ariaLabel }: {
@@ -530,7 +530,7 @@ export const ParticipantAutocomplete = React.memo(function ParticipantAutocomple
       </div>
 
       {/* Модальное окно создания участника */}
-      <CreateParticipantModalResponsive
+      <CreateParticipantModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onCreateParticipant={handleCreateParticipant}

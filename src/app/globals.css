@@ -13,6 +13,9 @@ body {
 }
 
 :root {
+  /* Установка color-scheme для браузерной поддержки */
+  color-scheme: light;
+  
   --radius: 0.625rem;
   --background: 20 8% 97.5%;
   --foreground: 0 0% 3.9%;
@@ -48,6 +51,9 @@ body {
 }
 
 .dark {
+  /* Установка color-scheme для браузерной поддержки */
+  color-scheme: dark;
+  
   --background: 0 0% 3.9%;
   --foreground: 0 0% 98%;
   --card: 0 0% 3.9%;
@@ -62,7 +68,7 @@ body {
   --muted-foreground: 0 0% 63.9%;
   --accent: 0 0% 14.9%;
   --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --destructive: 0 62.8% 50.6%;
   --destructive-foreground: 0 0% 98%;
   --border: 0 0% 14.9%;
   --input: 0 0% 14.9%;
@@ -73,11 +79,11 @@ body {
   --chart-4: 0 0% 30%;
   --chart-5: 0 0% 20%;
   /* Мягкие цвета для темной темы */
-  --warning: 30 84% 40%;
+  --warning: 30 84% 55%;
   --warning-foreground: 0 0% 98%;
-  --info: 210 40% 40%;
+  --info: 210 40% 55%;
   --info-foreground: 0 0% 98%;
-  --success: 120 40% 40%;
+  --success: 120 40% 55%;
   --success-foreground: 0 0% 98%;
 }
 

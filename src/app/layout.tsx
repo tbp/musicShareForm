@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ReleaseLayout } from "@/components/layout/release-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,10 +25,40 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" suppressHydrationWarning>
+      <head>
+        {/* Inline script для предотвращения моргания темы */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  
+                  var shouldBeDark = theme === 'dark' || (theme !== 'light' && systemDark);
+                  
+                  if (shouldBeDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // Fallback если localStorage недоступен
+                  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                  }
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background font-sans`}
       >
-        {children}
+        <ReleaseLayout>
+          {children}
+        </ReleaseLayout>
       </body>
     </html>
   );

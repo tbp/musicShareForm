@@ -1,9 +1,7 @@
 'use client'
 
 import React from 'react'
-import dynamic from 'next/dynamic'
 import { X, HelpCircle } from 'lucide-react'
-
 
 import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -13,7 +11,8 @@ import type {
   ParticipantRow, 
   ParticipantsSectionProps 
 } from '../types/participant.types'
-import { CreateParticipantModalResponsive } from './CreateParticipantModalResponsive'
+import { CreateParticipantModal } from './CreateParticipantModal'
+import ParticipantsTableWrapper from './ParticipantsTableWrapper'
 import { createColumns } from './ParticipantsTable/columns'
 import {
   useParticipants,
@@ -23,21 +22,6 @@ import {
   useRemoveParticipant,
   useMoveParticipant
 } from '../contexts/participant-context'
-
-// Обертка для таблицы участников без SSR
-const ParticipantsTableWrapper = dynamic(
-  () => import('./ParticipantsTableWrapper'),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="rounded-md border">
-        <div className="p-4 text-center text-muted-foreground">
-          Загрузка таблицы участников...
-        </div>
-      </div>
-    )
-  }
-)
 
 // Минималистичный компонент превью участников  
 interface ParticipantsPreviewProps {
@@ -158,7 +142,7 @@ export function ParticipantsSection({
   onUpdateArtist: _onUpdateArtist
 }: ParticipantsSectionProps) {
   
-  // Zustand стор для внутреннего состояния виджета
+  // React Context с useReducer для внутреннего состояния виджета
   const participants = useParticipants()
   const setParticipants = useSetParticipants()
   const updateParticipant = useUpdateParticipant()
@@ -166,8 +150,16 @@ export function ParticipantsSection({
   const removeParticipant = useRemoveParticipant()
   const moveParticipant = useMoveParticipant()
   
+  // Client-only рендеринг для избежания hydration mismatch
+  const [isMounted, setIsMounted] = React.useState(false)
+  
   // Флаг для предотвращения циклов
   const [isInitialized, setIsInitialized] = React.useState(false)
+  
+  // Устанавливаем mounted флаг только на клиенте
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
   
   // Синхронизация с внешним состоянием только при первой загрузке
   React.useEffect(() => {
@@ -190,54 +182,53 @@ export function ParticipantsSection({
   // Локальное состояние для Various Artists
   const [variousArtists, setVariousArtists] = React.useState(false)
 
-  // Обработчик добавления участника (теперь использует Zustand)
+  // Обработчик добавления участника (стабильная ссылка)
   const handleAddArtist = React.useCallback(() => {
     const newParticipant: ArtistCredit = {
       id: `participant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       displayName: '',
       role: 'MainArtist',
-      sequence: participants.length + 1
+      sequence: stableParticipants.current.length + 1
     }
-    addParticipant(newParticipant)
+    stableAddParticipant.current(newParticipant)
     
     // Ставим фокус в input нового участника
     setTimeout(() => {
-      const newRowIndex = participants.length // Индекс новой строки
+      const newRowIndex = stableParticipants.current.length // Индекс новой строки
       const input = document.querySelector(`[data-row-index="${newRowIndex}"] input`) as HTMLInputElement
       if (input) {
         input.focus()
       }
     }, 100)
-  }, [addParticipant, participants.length])
+  }, [])
 
-  // Обработчик удаления участника (теперь использует Zustand)
+  // Обработчик удаления участника (стабильная ссылка)
   const handleRemoveArtist = React.useCallback((index: number) => {
-    removeParticipant(index)
-  }, [removeParticipant])
+    stableRemoveParticipant.current(index)
+  }, [])
 
-  // Обработчик перемещения участника (теперь использует Zustand, с правильными зависимостями)
+  // Обработчик перемещения участника (стабильная ссылка)
   const handleMoveArtist = React.useCallback((fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex) return
-    moveParticipant(fromIndex, toIndex)
-  }, [moveParticipant])
+    stableMoveParticipant.current(fromIndex, toIndex)
+  }, [])
 
   // Обработчик редактирования участника
   const handleEditParticipant = React.useCallback((index: number, participant: ArtistCredit) => {
-    console.log('Edit participant:', index, participant)
     setEditingParticipant({ index, participant })
   }, [])
 
-  // Обработчик сохранения изменений участника
+  // Обработчик сохранения изменений участника (стабильные ссылки)
   const handleSaveParticipant = React.useCallback((updatedParticipant: any) => {
     if (editingParticipant) {
       // Получаем текущего участника и обновляем его
-      const currentParticipant = participants[editingParticipant.index]
+      const currentParticipant = stableParticipants.current[editingParticipant.index]
       const mergedParticipant = { ...currentParticipant, ...updatedParticipant }
-      updateParticipant(editingParticipant.index, mergedParticipant)
+      stableUpdateParticipant.current(editingParticipant.index, mergedParticipant)
     }
     // Затем закрываем модальное окно
     setEditingParticipant(null)
-  }, [editingParticipant, updateParticipant, participants])
+  }, [editingParticipant])
 
   // Преобразуем participants в ParticipantRow, используя стабильные ID из данных
   const participantsData: ParticipantRow[] = React.useMemo(() => 
@@ -246,16 +237,32 @@ export function ParticipantsSection({
       id: artist.id || `legacy-participant-${index}` // Fallback для старых данных
     })), [participants])
 
-  // Адаптер для преобразования signature updateParticipant
+  // Стабильные ссылки для предотвращения перерендеров
+  const stableUpdateParticipant = React.useRef(updateParticipant)
+  const stableRemoveParticipant = React.useRef(removeParticipant)
+  const stableMoveParticipant = React.useRef(moveParticipant)
+  const stableAddParticipant = React.useRef(addParticipant)
+  const stableParticipants = React.useRef(participants)
+  
+  // Обновляем ссылки при изменении
+  React.useEffect(() => {
+    stableUpdateParticipant.current = updateParticipant
+    stableRemoveParticipant.current = removeParticipant
+    stableMoveParticipant.current = moveParticipant
+    stableAddParticipant.current = addParticipant
+    stableParticipants.current = participants
+  })
+
+  // Адаптер для преобразования signature updateParticipant (теперь стабильный!)
   const handleUpdateParticipantField = React.useCallback((index: number, field: string, value: unknown) => {
-    const currentParticipant = participants[index]
+    const currentParticipant = stableParticipants.current[index]
     if (currentParticipant) {
       const updatedParticipant = { ...currentParticipant, [field]: value }
-      updateParticipant(index, updatedParticipant)
+      stableUpdateParticipant.current(index, updatedParticipant)
     }
-  }, [participants, updateParticipant])
+  }, [])
 
-  // Создаем колонки с передачей колбеков из Context (мемоизируем для предотвращения перерендеров)
+  // Создаем колонки с передачей стабильных колбеков (мемоизируем для предотвращения перерендеров)
   const columns = React.useMemo(() => createColumns({
     onUpdate: handleUpdateParticipantField,
     onRemove: handleRemoveArtist,
@@ -288,7 +295,14 @@ export function ParticipantsSection({
 
       {/* Таблица участников */}
       <div className="space-y-4">
-        {participants.length > 0 ? (
+        {!isMounted ? (
+          // Плейсхолдер для SSR и начальной загрузки
+          <div className="rounded-md border">
+            <div className="p-4 text-center text-muted-foreground">
+              Загрузка таблицы участников...
+            </div>
+          </div>
+        ) : participants.length > 0 ? (
           <div>
             <ParticipantsTableWrapper
               columns={columns}
@@ -324,7 +338,7 @@ export function ParticipantsSection({
 
       {/* Модальное окно редактирования участника */}
       {editingParticipant && (
-        <CreateParticipantModalResponsive
+        <CreateParticipantModal
           isOpen={!!editingParticipant}
           onClose={() => setEditingParticipant(null)}
           onCreateParticipant={handleSaveParticipant}

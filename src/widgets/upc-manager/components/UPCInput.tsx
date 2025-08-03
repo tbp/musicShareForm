@@ -30,6 +30,8 @@ export function UPCInput({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
+    const cursorPosition = e.target.selectionStart || 0
+    const oldNumbers = value.replace(/\D/g, '')
     const numbers = inputValue.replace(/\D/g, '') // Убираем все кроме цифр
     
     // Ограничиваем до 13 цифр максимум
@@ -40,11 +42,48 @@ export function UPCInput({
     setDetectedFormat(format)
     
     // Сбрасываем touched состояние при вводе новых символов
-    if (isTouched && numbers.length > value.replace(/\D/g, '').length) {
+    if (isTouched && numbers.length > oldNumbers.length) {
       setIsTouched(false)
     }
     
     onChange?.(numbers) // Отправляем только цифры в родительский компонент
+    
+    // Восстанавливаем позицию курсора после форматирования
+    setTimeout(() => {
+      if (inputRef.current) {
+        const newFormatted = formatUPC(numbers)
+        
+        // Подсчитываем количество цифр до позиции курсора в исходной строке
+        let digitsBeforeCursor = 0
+        for (let i = 0; i < Math.min(cursorPosition, inputValue.length); i++) {
+          if (/\d/.test(inputValue[i])) {
+            digitsBeforeCursor++
+          }
+        }
+        
+        // Находим позицию в новой отформатированной строке
+        let newCursorPosition = 0
+        let digitCount = 0
+        
+        for (let i = 0; i < newFormatted.length; i++) {
+          if (/\d/.test(newFormatted[i])) {
+            digitCount++
+            if (digitCount >= digitsBeforeCursor) {
+              newCursorPosition = i + 1
+              break
+            }
+          } else if (digitCount < digitsBeforeCursor) {
+            // Если мы еще не достигли нужного количества цифр, продолжаем
+            newCursorPosition = i + 1
+          }
+        }
+        
+        // Убеждаемся, что курсор не выходит за границы
+        newCursorPosition = Math.min(newCursorPosition, newFormatted.length)
+        
+        inputRef.current.setSelectionRange(newCursorPosition, newCursorPosition)
+      }
+    }, 0)
   }
 
   const displayValue = formatUPC(value)

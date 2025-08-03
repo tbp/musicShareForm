@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { AnimatedInput } from '@/components/ui/animated-input'
 
 interface ISNIInputProps {
@@ -66,9 +66,11 @@ export function ISNIInput({
   className
 }: ISNIInputProps) {
   const [isTouched, setIsTouched] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
+    const cursorPosition = e.target.selectionStart || 0
     const formattedValue = formatISNI(inputValue)
     
     // Создаем новое событие с отформатированным значением
@@ -86,6 +88,40 @@ export function ISNIInput({
     if (isTouched) {
       setIsTouched(false)
     }
+    
+    // Восстанавливаем позицию курсора после форматирования
+    setTimeout(() => {
+      if (inputRef.current) {
+        // Подсчитываем количество цифр до позиции курсора в исходной строке
+        let digitsBeforeCursor = 0
+        for (let i = 0; i < Math.min(cursorPosition, inputValue.length); i++) {
+          if (/\d/.test(inputValue[i])) {
+            digitsBeforeCursor++
+          }
+        }
+        
+        // Находим позицию в новой отформатированной строке
+        let newCursorPosition = 0
+        let digitCount = 0
+        
+        for (let i = 0; i < formattedValue.length; i++) {
+          if (/\d/.test(formattedValue[i])) {
+            digitCount++
+            if (digitCount >= digitsBeforeCursor) {
+              newCursorPosition = i + 1
+              break
+            }
+          } else if (digitCount < digitsBeforeCursor) {
+            newCursorPosition = i + 1
+          }
+        }
+        
+        // Убеждаемся, что курсор не выходит за границы
+        newCursorPosition = Math.min(newCursorPosition, formattedValue.length)
+        
+        inputRef.current.setSelectionRange(newCursorPosition, newCursorPosition)
+      }
+    }, 0)
   }, [onChange, isTouched])
   
   const handleBlur = useCallback(() => {
@@ -98,6 +134,7 @@ export function ISNIInput({
   return (
     <div className="relative">
       <AnimatedInput
+        ref={inputRef}
         id={id}
         label={label}
         value={value}
