@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { 
   Plus, 
   Trash2, 
@@ -30,7 +30,6 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core'
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -42,7 +41,6 @@ import {
 
 import type { 
   ArtistCredit, 
-  ParticipantRow, 
   ParticipantsSectionProps 
 } from '../types/participant.types'
 import { CreateParticipantModalResponsive } from './CreateParticipantModalResponsive'
@@ -64,7 +62,6 @@ interface SortableParticipantCardProps {
   onRemove: (index: number) => void
   onEdit?: (index: number, participant: ArtistCredit) => void
   isLastMainArtist: boolean
-  isDragging?: boolean
 }
 
 function SortableParticipantCard({
@@ -73,8 +70,7 @@ function SortableParticipantCard({
   onUpdate,
   onRemove,
   onEdit,
-  isLastMainArtist,
-  isDragging = false
+  isLastMainArtist
 }: SortableParticipantCardProps) {
   const {
     attributes,

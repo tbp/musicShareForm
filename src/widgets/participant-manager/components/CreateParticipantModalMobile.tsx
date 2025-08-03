@@ -1,36 +1,31 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, Trash2, User, Hash, ExternalLink, Check, ChevronsUpDown, HelpCircle, ArrowLeft, X } from 'lucide-react'
-import { getPlatformInfo, PLATFORMS } from '@/lib/platforms'
-import { PARTICIPANT_ROLES } from '../constants/participantRoles'
+import { Plus, Trash2, User, Hash, ExternalLink, ArrowLeft } from 'lucide-react'
+import { getPlatformInfo } from '@/lib/platforms'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AnimatedInput } from '@/components/ui/animated-input'
 import { ISNIInput } from './ISNIInput'
 import { IPIInput } from './IPIInput'
-import { 
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from '@/components/ui/command'
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { usePlatformIcon } from '@/components/shared/icons'
 
 import type { 
   ParticipantSuggestion, 
-  PlatformLink, 
   PlatformType, 
   CreateParticipantModalProps 
 } from '../types/participant.types'
+
+// Компонент для иконки платформы
+function PlatformIconComponent({ platformId }: { platformId: PlatformType }) {
+  const PlatformIcon = usePlatformIcon(platformId)
+  const platformInfo = getPlatformInfo(platformId)
+  
+  return React.createElement(PlatformIcon, {
+    'aria-label': platformInfo.name
+  })
+}
 
 // Мобильная версия модального окна - полноэкранная
 export function CreateParticipantModalMobile({
@@ -252,12 +247,11 @@ export function CreateParticipantModalMobile({
             <div className="space-y-3">
               {platformLinks.map((link, index) => {
                 const platformInfo = getPlatformInfo(link.platform)
-                const PlatformIcon = usePlatformIcon(link.platform)
                 
                 return (
                   <div key={index} className="border border-border rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-3">
-                      <PlatformIcon />
+                      <PlatformIconComponent platformId={link.platform} />
                       <span className="font-medium text-sm">{platformInfo.name}</span>
                       <Button
                         variant="ghost"

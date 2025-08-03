@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, Trash2, User, Hash, ExternalLink, Check, ChevronsUpDown, HelpCircle } from 'lucide-react'
+import { Plus, Trash2, Hash, ExternalLink, Check, ChevronsUpDown, HelpCircle } from 'lucide-react'
 import { getPlatformInfo, PLATFORMS } from '@/lib/platforms'
 import { PARTICIPANT_ROLES } from '../constants/participantRoles'
 import { 
@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { AnimatedInput } from '@/components/ui/animated-input'
 import { ISNIInput } from './ISNIInput'
 import { IPIInput } from './IPIInput'
@@ -35,7 +34,6 @@ import { usePlatformIcon } from '@/components/shared/icons'
 
 import type { 
   ParticipantSuggestion, 
-  PlatformLink, 
   PlatformType, 
   CreateParticipantModalProps 
 } from '../types/participant.types'
@@ -70,17 +68,24 @@ function PlatformIconButton({ platformId }: { platformId: PlatformType }) {
   })
 }
 
+// Компонент для иконки платформы
+function PlatformIconComponent({ platformId }: { platformId: PlatformType }) {
+  const PlatformIcon = usePlatformIcon(platformId)
+  const platformInfo = getPlatformInfo(platformId)
+  
+  return React.createElement(PlatformIcon, {
+    size: 'md',
+    'aria-label': platformInfo.name
+  })
+}
+
 // Компонент для элемента в списке платформ
 function PlatformListItem({ platformId }: { platformId: PlatformType }) {
-  const PlatformIcon = usePlatformIcon(platformId)
   const platformInfo = getPlatformInfo(platformId)
   
   return (
     <div className="flex items-center gap-2 flex-1">
-      {React.createElement(PlatformIcon, {
-        size: 'md',
-        'aria-label': platformInfo.name
-      })}
+      <PlatformIconComponent platformId={platformId} />
       <span>{platformInfo.name}</span>
     </div>
   )
@@ -514,7 +519,6 @@ export function CreateParticipantModal({
               <div className="space-y-3">
                 {platformLinks.map((link, index) => {
                   const platformInfo = getPlatformInfo(link.platform)
-                  const PlatformIcon = usePlatformIcon(link.platform)
                   const isOtherPlatform = link.platform === 'other'
                   const rawDisplayName = isOtherPlatform 
                     ? (link.customName || 'Другая площадка') 
@@ -538,7 +542,7 @@ export function CreateParticipantModal({
                         {/* Иконка и название платформы слева */}
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 max-w-36 z-10">
                           <div className="flex-shrink-0 h-4 w-4">
-                            <PlatformIcon />
+                            <PlatformIconComponent platformId={link.platform} />
                           </div>
                           
                           {/* Название платформы - inline редактирование для других */}
