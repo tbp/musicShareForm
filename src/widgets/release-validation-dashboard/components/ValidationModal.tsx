@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckCircle, AlertCircle, Clock, X } from 'lucide-react'
-import type { ValidationRequirement, ValidationModalProps } from '../types/validation.types'
+import type { ValidationModalProps } from '../types/validation.types'
 
 export function ValidationModal({ 
   isOpen, 

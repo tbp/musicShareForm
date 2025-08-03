@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, Trash2, User, Hash, ExternalLink, Check, ChevronsUpDown } from 'lucide-react'
-import { ParticipantSuggestion, PlatformLink, PlatformType } from '@/widgets/participant-manager'
-import { getPlatformInfo, PLATFORMS } from '@/lib/platforms'
+
+import { Plus, Trash2, User, Hash, ExternalLink } from 'lucide-react'
+import { PlatformLink, ParticipantSuggestion } from '@/widgets/participant-manager'
+
 import { 
   Dialog,
   DialogContent,
@@ -14,20 +15,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from '@/components/ui/command'
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+
+
+
 
 interface CreateParticipantModalProps {
   isOpen: boolean
@@ -37,73 +27,7 @@ interface CreateParticipantModalProps {
 }
 
 // Компонент для выбора платформы с иконкой
-interface PlatformComboboxProps {
-  value: PlatformType
-  onChange: (value: PlatformType) => void
-}
 
-function PlatformCombobox({ value, onChange }: PlatformComboboxProps) {
-  const [open, setOpen] = React.useState(false)
-  const selectedPlatform = getPlatformInfo(value)
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[180px] justify-between"
-        >
-          <div className="flex items-center gap-2">
-            <img
-              src={selectedPlatform.icon}
-              alt={selectedPlatform.name}
-              className="w-4 h-4"
-            />
-            <span className="truncate">{selectedPlatform.name}</span>
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[180px] p-0">
-        <Command>
-          <CommandInput placeholder="Поиск платформы..." />
-          <CommandList>
-            <CommandEmpty>Платформа не найдена.</CommandEmpty>
-            <CommandGroup>
-              {Object.values(PLATFORMS).map((platform) => (
-                <CommandItem
-                  key={platform.id}
-                  value={platform.id}
-                  onSelect={() => {
-                    onChange(platform.id)
-                    setOpen(false)
-                  }}
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <img
-                      src={platform.icon}
-                      alt={platform.name}
-                      className="w-4 h-4"
-                    />
-                    <span>{platform.name}</span>
-                  </div>
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      value === platform.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
-}
 
 export function CreateParticipantModal({
   isOpen,
@@ -294,10 +218,19 @@ export function CreateParticipantModal({
                 {platformLinks.map((link, index) => (
                   <div key={index} className="flex items-center gap-3 p-3 border border-border rounded-lg">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <PlatformCombobox
+                      <select
                         value={link.platform}
-                        onChange={(value) => updatePlatformLink(index, 'platform', value)}
-                      />
+                        onChange={(e) => updatePlatformLink(index, 'platform', e.target.value as any)}
+                        className="px-3 py-2 border border-input bg-background text-sm rounded-md min-w-[120px]"
+                      >
+                        <option value="spotify">Spotify</option>
+                        <option value="appleMusic">Apple Music</option>
+                        <option value="yandex">Яндекс Музыка</option>
+                        <option value="youtubeMusic">YouTube Music</option>
+                        <option value="vk">VK Music</option>
+                        <option value="deezer">Deezer</option>
+                        <option value="bandLink">BandLink</option>
+                      </select>
                       <Input
                         value={link.url}
                         onChange={(e) => updatePlatformLink(index, 'url', e.target.value)}

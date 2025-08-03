@@ -96,7 +96,7 @@ export function useFileUpload(
   const removeFile = useCallback((fileId: string) => {
     setFiles(prev => prev.filter(file => file.id !== fileId))
     setValidationErrors(prev => {
-      const { [fileId]: removed, ...rest } = prev
+              const { [fileId]: _, ...rest } = prev
       return rest
     })
   }, [])

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import type { ValidationRequirement, ValidationState } from '../types/validation.types'
+import type { ValidationRequirement } from '../types/validation.types'
 
 export function useValidation(initialRequirements: ValidationRequirement[] = []) {
   const [requirements, setRequirements] = useState<ValidationRequirement[]>(initialRequirements)

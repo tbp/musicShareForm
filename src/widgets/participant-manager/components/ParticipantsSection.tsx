@@ -139,7 +139,7 @@ export function ParticipantsSection({
   onParticipantsChange,
   errors,
   onInputChange,
-  onUpdateArtist: _onUpdateArtist
+  onUpdateArtist
 }: ParticipantsSectionProps) {
   
   // React Context с useReducer для внутреннего состояния виджета

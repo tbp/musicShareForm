@@ -36,7 +36,7 @@ export function ShareButton({ className }: ShareButtonProps) {
 
   const handleInviteUser = () => {
     // Здесь будет логика отправки приглашения
-    console.log('Inviting user:', shareEmail, 'with access:', access)
+    console.log('Inviting user:', shareEmail)
     setShareEmail('')
   }
 

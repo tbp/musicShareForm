@@ -1,6 +1,6 @@
 // Типы для Release Schedule Manager Widget
 
-import type { DateValue } from '@internationalized/date'
+
 
 export interface DatePreset {
   label: string

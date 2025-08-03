@@ -4,7 +4,7 @@ import React from 'react'
 import { Upload, X, Music, File, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { TrackUploadProps } from '../types/track-collection.types'
-import { getTrackDisplayInfo, formatFileSize } from '../utils/trackValidation'
+import { getTrackDisplayInfo } from '../utils/trackValidation'
 
 const EnhancedFileUpload = React.forwardRef<HTMLDivElement, TrackUploadProps>(
   ({ 
@@ -144,7 +144,7 @@ const EnhancedFileUpload = React.forwardRef<HTMLDivElement, TrackUploadProps>(
       const updatedFiles = value.filter(file => file.id !== fileId)
       onFilesChange?.(updatedFiles)
       setValidationErrors(prev => {
-        const { [fileId]: removed, ...rest } = prev
+        const { [fileId]: _, ...rest } = prev
         return rest
       })
     }, [value, onFilesChange])

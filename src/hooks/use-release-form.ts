@@ -49,7 +49,7 @@ export function useReleaseForm() {
     // Очистка ошибки при изменении (БЕЗ зависимости от errors)
     setErrors(prev => {
       if (prev[field]) {
-        const { [field]: removed, ...rest } = prev
+        const { [field]: _, ...rest } = prev
         return rest
       }
       return prev
